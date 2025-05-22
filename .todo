@@ -1,0 +1,16 @@
+- In landpage: searchbar: If searched an app that not found, show "Did not find an app? Submit a issue to (The Package Provider)[https://github.com/winget-pkg/...etc].
+- In landpage: page add popular apps first then the search bar to add any app.
+- In landpage: add "We are just a pipline between Microsoft Products Windows 10/11 (The OS) and WinGet (The Package Manager)"
+
+
+
+V2
+- Add Custom Windows Settings (Using PowerShell Scripts).
+
+V3
+- Add DB.
+- Add Stripe, subscription based with a single plan (second plan will be for V4).
+
+V4
+- In landpage: searchbar: If searched an app that not found, show "Have an .exe file? You can upload the installation file so we can only start it, a GUI will be shown 😐 
+But wait most applications has predefined arguments that will install it silently! See your application documentation usually under CLI parameters"
