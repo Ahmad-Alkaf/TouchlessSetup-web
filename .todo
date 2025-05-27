@@ -2,6 +2,14 @@
 - In landpage: page add popular apps first then the search bar to add any app.
 - In landpage: add "We are just a pipline between Microsoft Products Windows 10/11 (The OS) and WinGet (The Package Manager)"
 
+Publish on 2025-06-30 plan:
+- 06-10: Finish UI. 
+01: Finish 20 popular apps (icon, id, name).
+05: Add winget apps with searchbar.
+08: Finish Download button with all selected apps.
+10: Beautify.
+- 06-20: Using Ubentu/Debian VMware try compile .NET by each POST request.
+- 06-30: Deploy to Digital Ocean.
 
 
 V2

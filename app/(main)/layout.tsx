@@ -1,22 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import { use, useState, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { CircleIcon, Home, LogOut } from 'lucide-react';
+import {use, useState, Suspense} from 'react';
+import {Button} from '@/components/ui/button';
+import {CircleIcon, Home, LogOut} from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+//nodb
 // import { signOut } from '@/app/(login)/actions';
-import { useRouter } from 'next/navigation';
-import { User } from '@/lib/db/schema';
+// import {User} from '@/lib/db/schema';
+import {useRouter} from 'next/navigation';
 import useSWR from 'swr';
+import { Logo } from '@/components/ui/logo';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 //nodb
 // function UserMenu() {
@@ -81,30 +83,29 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // }
 
 function Header() {
-  return (
-    <header className="border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <CircleIcon className="h-6 w-6 text-orange-500" />
-          <span className="ml-2 text-xl font-semibold text-gray-900">TouchlessSetup</span>
-        </Link>
+	return (
+		<header className="border-b border-gray-200">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+				<Link href="/" className="flex items-center">
+					<Logo />
+				</Link>
 
-        {/*nodb
+				{/*nodb
          <div className="flex items-center space-x-4">
           <Suspense fallback={<div className="h-9" />}>
             <UserMenu />
           </Suspense>
         </div> */}
-      </div>
-    </header>
-  );
+			</div>
+		</header>
+	);
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col min-h-screen">
-      <Header />
-      {children}
-    </section>
-  );
+export default function Layout({children}: {children: React.ReactNode}) {
+	return (
+		<section className="flex flex-col min-h-screen">
+			<Header />
+			{children}
+		</section>
+	);
 }
