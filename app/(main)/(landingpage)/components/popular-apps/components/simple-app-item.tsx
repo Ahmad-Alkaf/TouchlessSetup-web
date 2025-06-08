@@ -1,20 +1,26 @@
 import {Checkbox} from '@/components/ui/checkbox';
 import {Label} from '@/components/ui/label';
-import {WingetApp} from '@/lib/type';
+import {WinGetApp} from '@/lib/type';
+import {useContext} from 'react';
+import {SelectedAppsContext} from '../../SelectedAppsContext';
 
-export default function AppItem({
+export default function SimpleAppItem({
 	app,
-	isSelected,
-	toggleAppSelection
+	isSelected
 }: {
-	app: WingetApp;
+	app: WinGetApp;
 	isSelected: boolean;
-	toggleAppSelection: (app: WingetApp) => void;
 }) {
+	const context = useContext(SelectedAppsContext);
+	const {toggleAppSelection} = context;
+
 	return (
 		<Label
 			key={app.id}
-			className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted">
+			className={
+				'flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted ' +
+				(isSelected ? 'ring-2 ring-primary' : '')
+			}>
 			<Checkbox
 				checked={isSelected}
 				onCheckedChange={() => toggleAppSelection(app)}

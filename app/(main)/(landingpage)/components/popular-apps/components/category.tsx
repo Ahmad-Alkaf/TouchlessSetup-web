@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useMemo} from 'react';
+import {useState, useMemo, useContext} from 'react';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {
@@ -14,19 +14,14 @@ import {Checkbox} from '@/components/ui/checkbox';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Search, X, Plus, Check} from 'lucide-react';
-import {WingetApp, WingetCategory} from '@/lib/type';
-import AppItem from './app-item';
+import {WinGetApp, WinGetCategory} from '@/lib/type';
+import SimpleAppItem from './simple-app-item';
 import App from 'next/app';
+import {SelectedAppsContext} from '../../SelectedAppsContext';
 
-export default function Category({
-	category,
-	selectedApps,
-	toggleAppSelection
-}: {
-	category: WingetCategory;
-	selectedApps: WingetApp[];
-	toggleAppSelection: (app: WingetApp) => void;
-}) {
+export default function Category({category}: {category: WinGetCategory}) {
+	const context = useContext(SelectedAppsContext);
+	const {selectedApps, toggleAppSelection} = context;
 	const selectedCount = category.apps.filter(app =>
 		selectedApps.map(v => v.id).includes(app.id)
 	).length;
@@ -53,9 +48,9 @@ export default function Category({
 				) : (
 					<div className="grid grid-cols-2 gap-2">
 						{category.apps.map(app => (
-							<AppItem
+							<SimpleAppItem
+								key={app.id}
 								app={app}
-								toggleAppSelection={toggleAppSelection}
 								isSelected={selectedApps
 									.map(v => v.id)
 									.includes(app.id)}

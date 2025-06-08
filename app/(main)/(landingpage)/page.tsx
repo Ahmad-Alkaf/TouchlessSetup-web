@@ -1,16 +1,16 @@
 import {Button} from '@/components/ui/button';
 import {ArrowRight, CreditCard, Database} from 'lucide-react';
-import {Terminal} from './terminal';
-import Link from 'next/link';
 import Hero from './hero';
-import PopularApps from './popular-apps/popular-apps';
+import { SelectedApps } from './components/SelectedAppsContext';
+import ensureWinGetRepo from '@/scripts/ensure-winget-repo';
 
-export default function HomePage() {
+export default async function HomePage() {
+	await ensureWinGetRepo();
 	return (
 		<main>
 			<Hero />
 
-			<PopularApps />
+			<SelectedApps />
 
 			<section className="py-16 bg-white w-full">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -24,7 +24,7 @@ export default function Hero() {
 								<Button
 									size="lg"
 									variant="outline"
-									className="text-lg cursor-pointer rounded-full">
+									className="text-lg rounded-full">
 									Build Your Installer
 									<ArrowRight className="ml-2 h-5 w-5" />
 								</Button>

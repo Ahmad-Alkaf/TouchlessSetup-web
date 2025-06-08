@@ -14,6 +14,7 @@ Publish on 2025-06-30 plan:
 
 V2
 - Add Custom Windows Settings (Using PowerShell Scripts).
+- Each app has different versions, let user specify which version to download.
 
 V3
 - Add DB.

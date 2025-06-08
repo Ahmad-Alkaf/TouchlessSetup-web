@@ -16,7 +16,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 // import {User} from '@/lib/db/schema';
 import {useRouter} from 'next/navigation';
 import useSWR from 'swr';
-import { Logo } from '@/components/ui/logo';
+import {LogoTextRight} from '@/components/ui/logo';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -87,7 +87,7 @@ function Header() {
 		<header className="border-b border-gray-200">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
 				<Link href="/" className="flex items-center">
-					<Logo />
+					<LogoTextRight />
 				</Link>
 
 				{/*nodb
