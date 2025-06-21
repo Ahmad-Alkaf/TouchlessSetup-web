@@ -14,7 +14,7 @@ Publish on 2025-06-30 plan:
 
 V2
 - Add Custom Windows Settings (Using PowerShell Scripts).
-- Each app has different versions, let user specify which version to download.
+- Each app has different versions, let user specify which version to download, and latest version won't pass `-v` parameter which is used to specify the version.
 
 V3
 - Add DB.
@@ -23,3 +23,7 @@ V3
 V4
 - In landpage: searchbar: If searched an app that not found, show "Have an .exe file? You can upload the installation file so we can only start it, a GUI will be shown 😐 
 But wait most applications has predefined arguments that will install it silently! See your application documentation usually under CLI parameters"
+
+
+GENERAL
+- Detect clients OS if not supported inform them.

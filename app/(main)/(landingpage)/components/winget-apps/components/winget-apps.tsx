@@ -1,6 +1,6 @@
+'use client';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {Card, CardContent} from '@/components/ui/card';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
@@ -27,101 +27,14 @@ import {
 	ChevronRight,
 	ChevronsLeft,
 	ChevronsRight,
-	Clock,
-	Download,
 	Filter,
-	Grid3X3,
-	List,
 	Search,
-	Star,
 	X
 } from 'lucide-react';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {AppCard, AppListItem} from './app-item';
+import AppCard from './app-item/app-card';
 import {WinGetApp} from '@/lib/type';
 import {SelectedAppsContext} from '../../SelectedAppsContext';
-import {Tooltip, TooltipTrigger} from '@/components/ui/tooltip';
-import {TooltipContent} from '@radix-ui/react-tooltip';
-
-// Simulated large dataset - in real app this would come from API
-const generateApps: (count: number) => WinGetApp[] = count => {
-	const categories = [
-		'Productivity',
-		'Development',
-		'Design',
-		'Communication',
-		'Entertainment',
-		'Business',
-		'Education',
-		'Utilities',
-		'Games',
-		'Social',
-		'Finance',
-		'Health',
-		'Travel',
-		'News',
-		'Photography',
-		'Music',
-		'Video',
-		'Security'
-	];
-
-	const companies = [
-		'Microsoft',
-		'Google',
-		'Apple',
-		'Adobe',
-		'Slack',
-		'Zoom',
-		'Figma',
-		'Notion',
-		'Spotify',
-		'Discord',
-		'GitHub',
-		'JetBrains',
-		'Atlassian'
-	];
-
-	const appNames = [
-		'Studio',
-		'Pro',
-		'Express',
-		'Lite',
-		'Premium',
-		'Enterprise',
-		'Cloud',
-		'Desktop',
-		'Mobile',
-		'Web',
-		'Plus',
-		'Advanced',
-		'Standard',
-		'Basic'
-	];
-
-	return Array.from(
-		{length: count},
-		(_, i) =>
-			({
-				id: appNames[i % appNames.length] + i,
-				description: `A powerful ${categories[
-					i % categories.length
-				].toLowerCase()} application for modern workflows`,
-				name: appNames[i % appNames.length],
-				publisher: companies[i % companies.length],
-				releaseDate: new Date(
-					Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
-				),
-				tags: categories.slice(0, Math.floor(Math.random() * 3) + 1),
-				version: `${Math.floor(Math.random() * 20)}.${Math.floor(
-					Math.random() * 20
-				)}.${Math.floor(Math.random() * 20)}`
-			} as WinGetApp)
-	);
-};
-
-const APPS = generateApps(5000); // Simulate 5000 apps
-const ITEMS_PER_PAGE = 20;
 
 type SortOption =
 	| 'nameAscending'
@@ -129,17 +42,18 @@ type SortOption =
 	| 'releaseDateNewest'
 	| 'releaseDateOldest';
 
-type ViewMode = 'grid' | 'list';
-export default function SearchBar() {
-	const {selectedApps, setSelectedApps} = useContext(SelectedAppsContext);
+export default function WingetApps({apps}: {apps: WinGetApp[]}) {
+	const {selectedApps, setSelectedApps, installSelected} =
+		useContext(SelectedAppsContext);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
 	const [sortBy, setSortBy] = useState<SortOption>('nameAscending');
 	const [currentPage, setCurrentPage] = useState(1);
-	const [viewMode, setViewMode] = useState<ViewMode>('grid');
+	// const [viewMode, setViewMode] = useState<ViewMode>('grid');
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [selectedWinget, setSelectedWinget] = useState<WinGetApp[]>([]);
+	const [itemsPerPage, setItemsPerPage] = useState<number>(20);
 
 	// Debounce search input
 	useEffect(() => {
@@ -152,23 +66,23 @@ export default function SearchBar() {
 
 	// Get unique tags and publishers for filters
 	const tags = useMemo(
-		() => [...new Set(APPS.flatMap(app => app.tags))].sort(),
+		() => [...new Set(apps.flatMap(app => app.tags))].sort(),
 		[]
 	);
 
 	const publishers = useMemo(
-		() => [...new Set(APPS.map(app => app.publisher))].sort(),
+		() => [...new Set(apps.map(app => app.publisher))].sort(),
 		[]
 	);
 
 	// Filter and sort apps
 	const filteredAndSortedApps = useMemo<WinGetApp[]>(() => {
-		const filtered = APPS.filter(app => {
+		const filtered = apps.filter(app => {
 			const matchesSearch =
 				app.name
 					.toLowerCase()
 					.includes(debouncedSearch.toLowerCase()) ||
-				app.description
+				app.shortDescription
 					.toLowerCase()
 					.includes(debouncedSearch.toLowerCase()) ||
 				app.publisher
@@ -185,9 +99,17 @@ export default function SearchBar() {
 		filtered.sort((a, b) => {
 			switch (sortBy) {
 				case 'releaseDateNewest':
-					return b.releaseDate.getTime() - a.releaseDate.getTime();
+					return a.releaseDate == undefined
+						? 1
+						: b.releaseDate == undefined
+						? -1
+						: b.releaseDate.getTime() - a.releaseDate.getTime();
 				case 'releaseDateOldest':
-					return a.releaseDate.getTime() - b.releaseDate.getTime();
+					return b.releaseDate == undefined
+						? 1
+						: a.releaseDate == undefined
+						? -1
+						: a.releaseDate.getTime() - b.releaseDate.getTime();
 				case 'nameDescending':
 					return b.name.localeCompare(a.name);
 				case 'nameAscending':
@@ -200,11 +122,11 @@ export default function SearchBar() {
 	}, [debouncedSearch, selectedTags, sortBy]);
 
 	// Pagination
-	const totalPages = Math.ceil(filteredAndSortedApps.length / ITEMS_PER_PAGE);
+	const totalPages = Math.ceil(filteredAndSortedApps.length / itemsPerPage);
 	const paginatedApps = useMemo<WinGetApp[]>(() => {
-		const start = (currentPage - 1) * ITEMS_PER_PAGE;
-		return filteredAndSortedApps.slice(start, start + ITEMS_PER_PAGE);
-	}, [filteredAndSortedApps, currentPage]);
+		const start = (currentPage - 1) * itemsPerPage;
+		return filteredAndSortedApps.slice(start, start + itemsPerPage);
+	}, [filteredAndSortedApps, currentPage, itemsPerPage]);
 
 	const toggleTag = useCallback((tag: string) => {
 		setSelectedTags(prev =>
@@ -217,16 +139,41 @@ export default function SearchBar() {
 		setSearchTerm('');
 	}, []);
 
+	// Reset to first page when items per page changes
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [itemsPerPage]);
+
 	// Pagination Component
 	const Pagination = () => (
-		<div className="flex items-center justify-between">
-			<div className="text-sm text-muted-foreground">
-				Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{' '}
-				{Math.min(
-					currentPage * ITEMS_PER_PAGE,
-					filteredAndSortedApps.length
-				)}{' '}
-				of {filteredAndSortedApps.length} apps
+		<div className="flex items-center w-full justify-between">
+			<div className="flex items-center gap-2">
+				{/* Items per page selector */}
+				<Select
+					value={String(itemsPerPage)}
+					onValueChange={value =>
+						setItemsPerPage(Math.max(parseInt(value, 10), 20))
+					}>
+					<SelectTrigger className="w-32">
+						<SelectValue placeholder="Per page" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="20">20 / page</SelectItem>
+						<SelectItem value="50">50 / page</SelectItem>
+						<SelectItem value="100">100 / page</SelectItem>
+						<SelectItem value="1000">1000 / page</SelectItem>
+						<SelectItem value="100000">All / page</SelectItem>
+					</SelectContent>
+				</Select>
+
+				<div className="text-sm text-muted-foreground">
+					Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+					{Math.min(
+						currentPage * itemsPerPage,
+						filteredAndSortedApps.length
+					)}{' '}
+					of {filteredAndSortedApps.length} apps
+				</div>
 			</div>
 			<div className="flex items-center space-x-2">
 				<Button
@@ -269,19 +216,19 @@ export default function SearchBar() {
 	);
 
 	return (
-		<div className="max-w-7xl mx-auto p-6 space-y-6">
+		<div className="w-full p-6 space-y-6">
 			{/* Header */}
 			<div className="space-y-4">
-				<div className="flex items-center justify-between">
-					<div>
-						{/* <h1 className="text-3xl font-bold">App Directory</h1>
+				{/* <div className="flex items-center justify-between"> */}
+				{/* <div> */}
+				{/* <h1 className="text-3xl font-bold">App Directory</h1>
 						<p className="text-muted-foreground">
 							Browse and select from{' '}
-							{APPS.length.toLocaleString()} available
+							{apps.length.toLocaleString()} available
 							applications
 						</p> */}
-					</div>
-					<div className="flex items-center gap-2">
+				{/* </div> */}
+				{/* <div className="flex items-center gap-2">
 						<Button
 							variant="outline"
 							size="sm"
@@ -296,8 +243,8 @@ export default function SearchBar() {
 								<Grid3X3 className="h-4 w-4" />
 							)}
 						</Button>
-					</div>
-				</div>
+					</div> */}
+				{/* </div> */}
 
 				{/* Search and Filters */}
 				<div className="flex gap-4">
@@ -331,7 +278,8 @@ export default function SearchBar() {
 							</SelectItem>
 						</SelectContent>
 					</Select>
-					<Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+
+					{/* <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
 						<SheetTrigger asChild>
 							<Button variant="outline">
 								<Filter className="h-4 w-4 mr-2" />
@@ -351,7 +299,6 @@ export default function SearchBar() {
 								</SheetDescription>
 							</SheetHeader>
 							<div className="space-y-6 mt-6">
-								{/* Categories */}
 								<div>
 									<Label className="text-sm font-medium">
 										Tags
@@ -389,7 +336,7 @@ export default function SearchBar() {
 								</Button>
 							</div>
 						</SheetContent>
-					</Sheet>
+					</Sheet> */}
 				</div>
 
 				{/* Selection Summary */}
@@ -398,28 +345,10 @@ export default function SearchBar() {
 						<span className="text-sm">
 							<strong>{selectedApps.length}</strong> apps selected
 						</span>
-						{selectedApps.length > 0 && (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => {
-									setSelectedApps(prev =>
-										prev.filter(v =>
-											selectedWinget
-												.map(a => a.id)
-												.includes(v.id)
-										)
-									);
-									setSelectedWinget([]);
-								}}>
-								<X className="h-4 w-4 mr-1" />
-								Clear Selection
-							</Button>
-						)}
 					</div>
 					<div className="flex items-center gap-2">
 						{selectedApps.length > 0 && (
-							<Button size="sm">
+							<Button size="sm" onClick={installSelected}>
 								<Check className="h-4 w-4 mr-1" />
 								Install Selected ({selectedApps.length})
 							</Button>
@@ -431,7 +360,7 @@ export default function SearchBar() {
 			{/* Results */}
 			<div className="space-y-4">
 				{filteredAndSortedApps.length === 0 ? (
-					<div className="text-center py-12">
+					<div className="text-center py-12 w-full">
 						<p className="text-muted-foreground">
 							No apps found matching your criteria
 						</p>
@@ -444,20 +373,11 @@ export default function SearchBar() {
 					</div>
 				) : (
 					<>
-						{viewMode === 'grid' ? (
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-								{paginatedApps.map(app => (
-									<AppCard key={app.id} app={app} />
-								))}
-							</div>
-						) : (
-							<div className="space-y-2">
-								{paginatedApps.map(app => (
-									<AppListItem key={app.id} app={app} />
-								))}
-							</div>
-						)}
-
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+							{paginatedApps.map(app => (
+								<AppCard key={app.id} app={app} />
+							))}
+						</div>
 						<Pagination />
 					</>
 				)}

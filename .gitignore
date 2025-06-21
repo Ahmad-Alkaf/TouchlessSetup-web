@@ -2,6 +2,7 @@
 
 # custom
 /public/winget/winget-pkgs
+/public/winget/microsoft-winget-pkgs-*
 
 # dependencies
 /node_modules

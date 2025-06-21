@@ -8,8 +8,9 @@ import {
 	useState
 } from 'react';
 import PopularApps from './popular-apps/popular-apps';
-import WingetApps from './winget-apps/winget-apps';
+import WingetAppsCard from './winget-apps/winget-apps-card';
 import {Button} from '@/components/ui/button';
+import {Check, X} from 'lucide-react';
 
 type SelectedAppsContextType = {
 	selectedApps: WinGetApp[];
@@ -17,6 +18,9 @@ type SelectedAppsContextType = {
 	toggleAppSelection: (app: WinGetApp) => void;
 	clearAllSelection: () => void;
 	isSelected: (app: WinGetApp) => boolean;
+	wingetApps: WinGetApp[] | null;
+	setWingetApps: Dispatch<SetStateAction<WinGetApp[] | null>>;
+	installSelected: () => void;
 };
 
 export const SelectedAppsContext = createContext<SelectedAppsContextType>(
@@ -25,6 +29,7 @@ export const SelectedAppsContext = createContext<SelectedAppsContextType>(
 
 export function SelectedApps() {
 	const [selectedApps, setSelectedApps] = useState<WinGetApp[]>([]);
+	const [wingetApps, setWingetApps] = useState<WinGetApp[] | null>(null);
 	const clearAllSelection = () => setSelectedApps([]);
 	const isSelected = (app: WinGetApp) =>
 		selectedApps.map(v => v.id).includes(app.id);
@@ -35,6 +40,19 @@ export function SelectedApps() {
 				: [...prev, app]
 		);
 	};
+	const installSelected = () => {
+		if (typeof window !== 'undefined') {
+			const message =
+				`The installation feature is NOT IMPLEMENTED yet.\n\n` +
+				(selectedApps.length > 0
+					? `You have selected ${selectedApps.length} app${
+							selectedApps.length > 1 ? 's' : ''
+					  }:\n` +
+					  selectedApps.map(app => `• ${app.name}`).join('\n')
+					: 'No applications selected.');
+			alert(message);
+		} else alert('NOT IMPLEMENTED');
+	};
 
 	return (
 		<SelectedAppsContext.Provider
@@ -43,11 +61,14 @@ export function SelectedApps() {
 				setSelectedApps,
 				toggleAppSelection,
 				clearAllSelection,
-				isSelected
+				isSelected,
+				wingetApps,
+				setWingetApps,
+				installSelected
 			}}>
 			<div className="max-w-6xl mx-auto p-6 space-y-6">
 				<PopularApps />
-				<WingetApps />
+				<WingetAppsCard />
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<div>
@@ -58,13 +79,22 @@ export function SelectedApps() {
 								{selectedApps.length} apps selected
 							</p>
 						</div>
-						<div className="space-x-2">
+						<div className="space-x-4">
 							<Button
 								disabled={selectedApps.length === 0}
 								variant="outline"
 								size="sm"
 								onClick={clearAllSelection}>
+								<X className="h-4 w-4 mr-1" />
 								Clear All Selection
+							</Button>
+
+							<Button
+								disabled={selectedApps.length === 0}
+								size="sm"
+								onClick={installSelected}>
+								<Check className="h-4 w-4 mr-1" />
+								Install Selected ({selectedApps.length})
 							</Button>
 						</div>
 					</div>

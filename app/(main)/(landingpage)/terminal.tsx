@@ -8,11 +8,11 @@ export function Terminal() {
   const [copied, setCopied] = useState(false);
   const terminalSteps = [
     'git clone https://github.com/nextjs/saas-starter',
-    'pnpm install',
-    'pnpm db:setup',
-    'pnpm db:migrate',
-    'pnpm db:seed',
-    'pnpm dev 🎉',
+    'npm install',
+    'npm db:setup',
+    'npm db:migrate',
+    'npm db:seed',
+    'npm dev 🎉',
   ];
 
   useEffect(() => {

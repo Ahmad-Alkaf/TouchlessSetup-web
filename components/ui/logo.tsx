@@ -1,3 +1,5 @@
+import {cn} from '@/lib/utils';
+
 export function LogoTextRight({className}: {className?: string}) {
 	return (
 		<img
@@ -10,7 +12,7 @@ export function LogoTextBottom({className}: {className?: string}) {
 	return (
 		<img
 			src="/logo/logo-with-text-bottom.svg"
-			className={className ?? 'h-12'}
+			className={cn(className, 'h-12')}
 		/>
 	);
 }

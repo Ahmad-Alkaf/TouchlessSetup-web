@@ -20,11 +20,11 @@ import App from 'next/app';
 import {SelectedAppsContext} from '../../SelectedAppsContext';
 
 export default function Category({category}: {category: WinGetCategory}) {
-	const context = useContext(SelectedAppsContext);
-	const {selectedApps, toggleAppSelection} = context;
+	const {toggleAppSelection, selectedApps, isSelected} = useContext(SelectedAppsContext);
 	const selectedCount = category.apps.filter(app =>
 		selectedApps.map(v => v.id).includes(app.id)
 	).length;
+	if (category.apps.length === 0) return null;
 
 	return (
 		<Card key={category.name}>
@@ -41,11 +41,6 @@ export default function Category({category}: {category: WinGetCategory}) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				{category.apps.length === 0 ? (
-					<p className="text-sm text-muted-foreground py-4">
-						No apps found in this category
-					</p>
-				) : (
 					<div className="grid grid-cols-2 gap-2">
 						{category.apps.map(app => (
 							<SimpleAppItem
@@ -57,7 +52,6 @@ export default function Category({category}: {category: WinGetCategory}) {
 							/>
 						))}
 					</div>
-				)}
 			</CardContent>
 		</Card>
 	);

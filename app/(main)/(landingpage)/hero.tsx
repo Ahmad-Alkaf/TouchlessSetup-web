@@ -10,14 +10,13 @@ export default function Hero() {
 				<div className="lg:grid lg:grid-cols-12 lg:gap-8">
 					<div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
 						<h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-							Install All Your Apps
+							Touchless Windows Setup
 							<span className="block text-blue-500">
-								Faster Than Ever
+								No clicks, no bloat
 							</span>
 						</h1>
 						<p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-							Create a custom .exe that installs apps without
-							prompts or distractions. Just pure efficiency.
+							Select the apps you need, click <strong>Install Selected</strong>, and we'll craft one hassle-free installer that sets everything up for you.
 						</p>
 						<div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
 							<Link href="#popular-apps">
