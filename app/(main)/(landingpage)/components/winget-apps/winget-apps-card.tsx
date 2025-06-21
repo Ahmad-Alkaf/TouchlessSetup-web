@@ -2,8 +2,7 @@
 import {Card, CardContent} from '@/components/ui/card';
 import WingetApps from './components/winget-apps';
 import wingetApps from '@/actions/load-winget-apps';
-import {WinGetApp} from '@/lib/type';
-import {Suspense, useContext, useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {SelectedAppsContext} from '../SelectedAppsContext';
 import Loading from '@/app/(main)/loading';
 
@@ -16,6 +15,7 @@ export default function WingetAppsCard() {
 			setIsLoading(true);
 			wingetApps()
 				.then(setWingetApps)
+				.catch(console.error)
 				.finally(() => setIsLoading(false));
 		} else setIsLoading(false);
 	}, []);
@@ -25,14 +25,9 @@ export default function WingetAppsCard() {
 			<div className="text-center space-y-2">
 				<h1 className="text-3xl font-bold">All Apps</h1>
 				<p className="text-muted-foreground">
-					Browse{' '}
-					{(apps?.length
-						.toLocaleString('us')
-						.substring(
-							0,
-							apps.length.toLocaleString('us').length - 2
-						) ?? '90') + '00'}
-					+ available applications and growing.
+					Browse {apps?.length.toLocaleString('us') ?? '9,000'}
+					{' '}
+					available applications and growing.
 				</p>
 			</div>
 			<CardContent>

@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+	return twMerge(clsx(inputs))
 }
 
 export const formatDownloads = (downloads: number) => {
@@ -11,7 +11,8 @@ export const formatDownloads = (downloads: number) => {
 	return downloads.toString();
 };
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date | string) => {
+	if (typeof date === 'string') date = new Date(date);
 	const now = new Date();
 	const diffTime = Math.abs(now.getTime() - date.getTime());
 	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

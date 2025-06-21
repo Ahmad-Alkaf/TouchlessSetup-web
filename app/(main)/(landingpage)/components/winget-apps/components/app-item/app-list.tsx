@@ -3,7 +3,7 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip';
 import {WinGetApp} from '@/lib/type';
 import {Checkbox} from '@radix-ui/react-checkbox';
-import {Box, Building2, Clock, Download, Star, Tag} from 'lucide-react';
+import {Building2, Clock, Star, Tag} from 'lucide-react';
 import {useContext} from 'react';
 import {formatDate} from '@/lib/utils';
 import {SelectedAppsContext} from '../../../SelectedAppsContext';
@@ -19,11 +19,11 @@ export function AppListItem({app}: {app: WinGetApp}) {
 				className="flex-1 grid grid-cols-12 gap-4 items-center"
 				onClick={() => toggleAppSelection(app)}>
 				<div className="col-span-4">
-			<Checkbox
-				checked={isSelected(app)}
-				onCheckedChange={() => toggleAppSelection(app)}
-				onClick={e => e.stopPropagation()}
-			/>
+					<Checkbox
+						checked={isSelected(app)}
+						onCheckedChange={() => toggleAppSelection(app)}
+						onClick={e => e.stopPropagation()}
+					/>
 					<div className="flex items-center gap-2">
 						<h3 className="font-semibold text-sm truncate">
 							{app.name}
@@ -39,16 +39,45 @@ export function AppListItem({app}: {app: WinGetApp}) {
 							</Tooltip>
 						)}
 					</div>
-					<p className="text-xs text-muted-foreground truncate">
-						{app.shortDescription}
-					</p>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<p className="text-xs text-muted-foreground truncate max-w-full">
+								{app.shortDescription.length > 140
+									? `${app.shortDescription.slice(0, 140)}...`
+									: app.shortDescription}
+							</p>
+						</TooltipTrigger>
+						<TooltipContent className="max-w-xs whitespace-pre-wrap">
+							{app.shortDescription}
+						</TooltipContent>
+					</Tooltip>
 				</div>
-				<div className="col-span-2">
-					{app.tags.map(tag => (
-						<Badge key={tag} variant="outline" className="text-xs">
-							{tag}
-						</Badge>
-					))}
+				<div className="col-span-2 flex items-center gap-1 flex-wrap">
+					{(() => {
+						const visibleTags = app.tags.slice(0, 4);
+						return visibleTags.map(tag => (
+							<Badge
+								key={tag}
+								variant="outline"
+								className="text-xs">
+								{tag}
+							</Badge>
+						));
+					})()}
+					{app.tags.length > 4 && (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Badge
+									variant="secondary"
+									className="text-xs cursor-pointer text-gray-600">
+									+{app.tags.length - 4}
+								</Badge>
+							</TooltipTrigger>
+							<TooltipContent className="max-w-xs whitespace-pre-wrap">
+								{app.tags.slice(4).join(', ')}
+							</TooltipContent>
+						</Tooltip>
+					)}
 				</div>
 				<div className="col-span-2 text-xs text-muted-foreground">
 					<Tooltip>
@@ -58,9 +87,7 @@ export function AppListItem({app}: {app: WinGetApp}) {
 								<span>{app.version}</span>
 							</div>
 						</TooltipTrigger>
-						<TooltipContent>
-							<p>Package Version</p>
-						</TooltipContent>
+						<TooltipContent>Package Version</TooltipContent>
 					</Tooltip>
 				</div>
 				<div className="col-span-2 text-xs text-muted-foreground">
@@ -71,9 +98,7 @@ export function AppListItem({app}: {app: WinGetApp}) {
 								<span>{app.publisher}</span>
 							</div>
 						</TooltipTrigger>
-						<TooltipContent>
-							<p>Publisher</p>
-						</TooltipContent>
+						<TooltipContent>Publisher</TooltipContent>
 					</Tooltip>
 				</div>
 				{app.releaseDate && (

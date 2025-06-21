@@ -28,6 +28,8 @@ import {
 	ChevronsLeft,
 	ChevronsRight,
 	Filter,
+	Grid3X3,
+	List,
 	Search,
 	X
 } from 'lucide-react';
@@ -35,6 +37,9 @@ import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import AppCard from './app-item/app-card';
 import {WinGetApp} from '@/lib/type';
 import {SelectedAppsContext} from '../../SelectedAppsContext';
+import {Tooltip, TooltipContent} from '@/components/ui/tooltip';
+import {TooltipTrigger} from '@radix-ui/react-tooltip';
+import {AppListItem} from './app-item/app-list';
 
 type SortOption =
 	| 'nameAscending'
@@ -50,9 +55,10 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
 	const [sortBy, setSortBy] = useState<SortOption>('nameAscending');
 	const [currentPage, setCurrentPage] = useState(1);
-	// const [viewMode, setViewMode] = useState<ViewMode>('grid');
-	const [isFilterOpen, setIsFilterOpen] = useState(false);
-	const [selectedWinget, setSelectedWinget] = useState<WinGetApp[]>([]);
+	//! Implement view mode later AFTER grid view is implemented
+	// const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+	// const [isFilterOpen, setIsFilterOpen] = useState(false);
+	// const [selectedWinget, setSelectedWinget] = useState<WinGetApp[]>([]);
 	const [itemsPerPage, setItemsPerPage] = useState<number>(20);
 
 	// Debounce search input
@@ -161,8 +167,8 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 						<SelectItem value="20">20 / page</SelectItem>
 						<SelectItem value="50">50 / page</SelectItem>
 						<SelectItem value="100">100 / page</SelectItem>
-						<SelectItem value="1000">1000 / page</SelectItem>
-						<SelectItem value="100000">All / page</SelectItem>
+						{/* <SelectItem value="1000">1000 / page</SelectItem>
+						<SelectItem value="100000">All / page</SelectItem> */}
 					</SelectContent>
 				</Select>
 
@@ -219,32 +225,19 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 		<div className="w-full p-6 space-y-6">
 			{/* Header */}
 			<div className="space-y-4">
-				{/* <div className="flex items-center justify-between"> */}
-				{/* <div> */}
-				{/* <h1 className="text-3xl font-bold">App Directory</h1>
+				{/* 
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className="text-3xl font-bold">App Directory</h1>
 						<p className="text-muted-foreground">
 							Browse and select from{' '}
 							{apps.length.toLocaleString()} available
 							applications
-						</p> */}
-				{/* </div> */}
-				{/* <div className="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								setViewMode(
-									viewMode === 'grid' ? 'list' : 'grid'
-								)
-							}>
-							{viewMode === 'grid' ? (
-								<List className="h-4 w-4" />
-							) : (
-								<Grid3X3 className="h-4 w-4" />
-							)}
-						</Button>
-					</div> */}
-				{/* </div> */}
+						</p>
+					</div> 
+					<div className="flex items-center gap-2"></div>
+				</div>
+					*/}
 
 				{/* Search and Filters */}
 				<div className="flex gap-4">
@@ -278,7 +271,27 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 							</SelectItem>
 						</SelectContent>
 					</Select>
-
+					{/* <Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									setViewMode(
+										viewMode === 'grid' ? 'list' : 'grid'
+									)
+								}>
+								{viewMode === 'grid' ? (
+									<List className="h-4 w-4" />
+								) : (
+									<Grid3X3 className="h-4 w-4" />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							{viewMode === 'grid' ? 'List View' : 'Grid View'}
+						</TooltipContent>
+					</Tooltip> */}
 					{/* <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
 						<SheetTrigger asChild>
 							<Button variant="outline">
@@ -373,11 +386,19 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 					</div>
 				) : (
 					<>
+						{/* {viewMode === 'grid' ? ( */}
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 							{paginatedApps.map(app => (
 								<AppCard key={app.id} app={app} />
 							))}
 						</div>
+						{/* ) : (
+							<div className="flex flex-col gap-2">
+								{paginatedApps.map(app => (
+									<AppListItem key={app.id} app={app} />
+								))}
+							</div>
+						 )} */}
 						<Pagination />
 					</>
 				)}
