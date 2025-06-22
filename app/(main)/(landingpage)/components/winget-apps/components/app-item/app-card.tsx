@@ -4,7 +4,7 @@ import {WinGetApp} from '@/lib/type';
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip';
 import {Building2, Clock, Star, Tag} from 'lucide-react';
 import {Badge} from '@/components/ui/badge';
-import {formatDate} from '@/lib/utils';
+import {cn, formatDate} from '@/lib/utils';
 import {memo, useMemo} from 'react';
 
 export interface AppCardProps {
@@ -16,80 +16,58 @@ export interface AppCardProps {
 function AppCardComponent({app, selected, onToggle}: AppCardProps) {
 	return (
 		<Card
-			className={`cursor-pointer transition-all hover:shadow-md ${
-				selected ? 'ring-2 ring-primary' : ''
-			}`}>
-			<CardContent className="p-2">
-				<div className="flex items-start space-x-3">
+			role="button"
+			tabIndex={0}
+			onClick={() => onToggle(app)}
+			className={cn(
+				'cursor-pointer transition-all hover:shadow-md',
+				selected && 'ring-2 ring-primary'
+			)}>
+			<CardContent className="px-2 flex flex-col h-full">
+				<div className="flex items-center gap-2 mb-1">
 					<Checkbox
 						checked={selected}
 						onCheckedChange={() => onToggle(app)}
 						onClick={e => e.stopPropagation()}
 					/>
-					<div
-						className="flex-1 min-w-0"
-						onClick={() => onToggle(app)}>
-						<div className="flex items-center gap-2 mb-1">
-							<h3
-								title={app.name}
-								className="font-semibold text-sm truncate">
-								{app.name}
-							</h3>
-							{app.verifiedSilence && (
-								<Tooltip>
-									<TooltipTrigger>
-										<Star className="h-3 w-3 text-yellow-500 fill-current" />
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Verified Silence Installation</p>
-									</TooltipContent>
-								</Tooltip>
-							)}
-						</div>
+					<h3
+						title={app.name}
+						className="font-semibold pointer-events-none text-sm truncate">
+						{app.name}
+					</h3>
+					{app.verifiedSilence && (
+						<Tooltip>
+							<TooltipTrigger>
+								<Star className="h-3 w-3 text-yellow-500 fill-current" />
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Verified Silence Installation</p>
+							</TooltipContent>
+						</Tooltip>
+					)}
+				</div>
 
-						<ShortDescription desc={app.shortDescription} />
-						<Tags tags={app.tags} />
+				<ShortDescription desc={app.shortDescription} />
+				<Tags tags={app.tags} />
 
-						<div className="flex items-center justify-between text-xs text-muted-foreground">
-							<Tooltip>
-								<TooltipTrigger>
-									<div className="flex items-center gap-1">
-										<Tag className="h-3 w-3" />
-										<span>{app.version}</span>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Version</p>
-								</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger>
-									<div className="flex items-center gap-1">
-										<Building2 className="h-3 w-3" />
-										<span>{app.publisher}</span>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Publisher</p>
-								</TooltipContent>
-							</Tooltip>
-							{app.releaseDate && (
-								<Tooltip>
-									<TooltipTrigger>
-										<div className="flex items-center gap-1">
-											<Clock className="h-3 w-3" />
-											<span>
-												{formatDate(app.releaseDate)}
-											</span>
-										</div>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Release Date</p>
-									</TooltipContent>
-								</Tooltip>
-							)}
-						</div>
-					</div>
+				<div className="flex mt-auto items-center justify-between text-xs text-muted-foreground">
+					<Version version={app.version} />
+					<Publisher publisher={app.publisher} />
+					{app.releaseDate && (
+						<Tooltip>
+							<TooltipTrigger>
+								<div className="flex items-center gap-1">
+									<Clock className="h-3 w-3" />
+									<span>
+										{formatDate(app.releaseDate)}
+									</span>
+								</div>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Release Date</p>
+							</TooltipContent>
+						</Tooltip>
+					)}
 				</div>
 			</CardContent>
 		</Card>
@@ -101,6 +79,38 @@ export default memo(
 	(prev, next) =>
 		prev.selected === next.selected && prev.app.id === next.app.id
 );
+
+function Publisher({publisher}: {publisher: string}) {
+	return (
+		<Tooltip delayDuration={800} >
+			<TooltipTrigger>
+				<div className="flex items-center gap-1">
+					<Building2 className="h-3 w-3" />
+					<span>{publisher}</span>
+				</div>
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>Publisher</p>
+			</TooltipContent>
+		</Tooltip>
+	);
+}
+
+function Version({version}: {version: string}) {
+	return (
+		<Tooltip delayDuration={800}>
+			<TooltipTrigger>
+				<div className="flex items-center gap-1">
+					<Tag className="h-3 w-3" />
+					<span>{version}</span>
+				</div>
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>Version</p>
+			</TooltipContent>
+		</Tooltip>
+	);
+}
 
 function ShortDescription({desc}: {desc: string}) {
 	return (
@@ -116,7 +126,6 @@ function ShortDescription({desc}: {desc: string}) {
 		</Tooltip>
 	);
 }
-
 
 function TagsComponent({tags}: {tags: string[]}) {
 	// Compute visible tags only if the array reference (or length) changes

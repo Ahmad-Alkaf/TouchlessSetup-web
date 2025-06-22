@@ -357,7 +357,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 				</div>
 
 				{/* Selection Summary */}
-				<div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+				<div className="flex items-center justify-between px-4 min-h-10 bg-muted/50 rounded-lg">
 					<div className="flex items-center gap-4">
 						<span className="text-sm">
 							<strong>{selectedApps.length}</strong> apps selected
@@ -391,7 +391,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 				) : (
 					<>
 						{/* {viewMode === 'grid' ? ( */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
 							{paginatedApps.map(app => (
 								<AppCard
 									key={app.id}
