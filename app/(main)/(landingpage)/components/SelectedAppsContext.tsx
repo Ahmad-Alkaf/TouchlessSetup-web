@@ -4,8 +4,8 @@ import {
 	createContext,
 	Dispatch,
 	SetStateAction,
-	useContext,
-	useState
+	useState,
+	useCallback
 } from 'react';
 import PopularApps from './popular-apps/popular-apps';
 import WingetAppsCard from './winget-apps/winget-apps-card';
@@ -31,15 +31,22 @@ export function SelectedApps() {
 	const [selectedApps, setSelectedApps] = useState<WinGetApp[]>([]);
 	const [wingetApps, setWingetApps] = useState<WinGetApp[] | null>(null);
 	const clearAllSelection = () => setSelectedApps([]);
-	const isSelected = (app: WinGetApp) =>
-		selectedApps.map(v => v.id).includes(app.id);
-	const toggleAppSelection = (app: WinGetApp) => {
+
+	// Memoized callback to check selection status to avoid new function reference on each render
+	const isSelected = useCallback(
+		(app: WinGetApp) => selectedApps.some(v => v.id === app.id),
+		[selectedApps]
+	);
+
+	// Memoized toggle function to maintain stable reference between renders
+	const toggleAppSelection = useCallback((app: WinGetApp) => {
 		setSelectedApps(prev =>
-			prev.map(v => v.id).includes(app.id)
+			prev.some(v => v.id === app.id)
 				? prev.filter(a => a.id !== app.id)
 				: [...prev, app]
 		);
-	};
+	}, []);
+
 	const installSelected = () => {
 		if (typeof window !== 'undefined') {
 			const message =

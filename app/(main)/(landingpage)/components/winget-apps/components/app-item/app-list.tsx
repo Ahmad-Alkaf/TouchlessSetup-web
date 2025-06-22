@@ -1,27 +1,30 @@
 import {Badge} from '@/components/ui/badge';
-import {Card, CardContent} from '@/components/ui/card';
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip';
 import {WinGetApp} from '@/lib/type';
 import {Checkbox} from '@radix-ui/react-checkbox';
 import {Building2, Clock, Star, Tag} from 'lucide-react';
-import {useContext} from 'react';
 import {formatDate} from '@/lib/utils';
-import {SelectedAppsContext} from '../../../SelectedAppsContext';
+import {memo} from 'react';
 
-export function AppListItem({app}: {app: WinGetApp}) {
-	const {toggleAppSelection, isSelected} = useContext(SelectedAppsContext);
+export interface AppListItemProps {
+	app: WinGetApp;
+	selected: boolean;
+	onToggle: (app: WinGetApp) => void;
+}
+
+function AppListItemComponent({app, selected, onToggle}: AppListItemProps) {
 	return (
 		<div
 			className={`flex items-center space-x-4 p-4 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
-				isSelected(app) ? 'ring-2 ring-primary' : ''
+				selected ? 'ring-2 ring-primary' : ''
 			}`}>
 			<div
 				className="flex-1 grid grid-cols-12 gap-4 items-center"
-				onClick={() => toggleAppSelection(app)}>
+				onClick={() => onToggle(app)}>
 				<div className="col-span-4">
 					<Checkbox
-						checked={isSelected(app)}
-						onCheckedChange={() => toggleAppSelection(app)}
+						checked={selected}
+						onCheckedChange={() => onToggle(app)}
 						onClick={e => e.stopPropagation()}
 					/>
 					<div className="flex items-center gap-2">
@@ -120,3 +123,7 @@ export function AppListItem({app}: {app: WinGetApp}) {
 		</div>
 	);
 }
+
+export const AppListItem = memo(AppListItemComponent, (prev, next) => {
+	return prev.selected === next.selected && prev.app === next.app;
+});

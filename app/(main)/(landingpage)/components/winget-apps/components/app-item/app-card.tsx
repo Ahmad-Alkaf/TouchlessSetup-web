@@ -1,30 +1,34 @@
 import {Card, CardContent} from '@/components/ui/card';
 import {Checkbox} from '@/components/ui/checkbox';
 import {WinGetApp} from '@/lib/type';
-import {useContext} from 'react';
-import {SelectedAppsContext} from '../../../SelectedAppsContext';
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip';
 import {Building2, Clock, Star, Tag} from 'lucide-react';
 import {Badge} from '@/components/ui/badge';
 import {formatDate} from '@/lib/utils';
+import {memo, useMemo} from 'react';
 
-export default function AppCard({app}: {app: WinGetApp}) {
-	const {toggleAppSelection, isSelected} = useContext(SelectedAppsContext);
+export interface AppCardProps {
+	app: WinGetApp;
+	selected: boolean;
+	onToggle: (app: WinGetApp) => void;
+}
+
+function AppCardComponent({app, selected, onToggle}: AppCardProps) {
 	return (
 		<Card
 			className={`cursor-pointer transition-all hover:shadow-md ${
-				isSelected(app) ? 'ring-2 ring-primary' : ''
+				selected ? 'ring-2 ring-primary' : ''
 			}`}>
 			<CardContent className="p-2">
 				<div className="flex items-start space-x-3">
 					<Checkbox
-						checked={isSelected(app)}
-						onCheckedChange={() => toggleAppSelection(app)}
+						checked={selected}
+						onCheckedChange={() => onToggle(app)}
 						onClick={e => e.stopPropagation()}
 					/>
 					<div
 						className="flex-1 min-w-0"
-						onClick={() => toggleAppSelection(app)}>
+						onClick={() => onToggle(app)}>
 						<div className="flex items-center gap-2 mb-1">
 							<h3
 								title={app.name}
@@ -43,60 +47,8 @@ export default function AppCard({app}: {app: WinGetApp}) {
 							)}
 						</div>
 
-						{app.shortDescription &&
-						app.shortDescription.length > 140 ? (
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<p className="text-xs text-muted-foreground mb-2">
-										{app.shortDescription.length > 140
-											? `${app.shortDescription.slice(
-													0,
-													140
-											  )}...`
-											: app.shortDescription}
-									</p>
-								</TooltipTrigger>
-								<TooltipContent className="max-w-xs whitespace-pre-wrap">
-									{app.shortDescription}
-								</TooltipContent>
-							</Tooltip>
-						) : (
-							<p className="text-xs text-muted-foreground mb-2 ">
-								{app.shortDescription}
-							</p>
-						)}
-
-						{/* Tags - show  */}
-						<div className="flex items-center gap-2 mb-2 flex-wrap">
-							{(() => {
-								const visibleTags = app.tags.slice(
-									0,
-									app.tags.length > 5 ? 4 : undefined
-								);
-								return visibleTags.map(tag => (
-									<Badge
-										key={tag}
-										variant="outline"
-										className="text-xs">
-										{tag}
-									</Badge>
-								));
-							})()}
-							{app.tags.length > 5 && (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Badge
-											variant="secondary"
-											className="text-xs cursor-pointer text-gray-600">
-											+{app.tags.length - 4} more
-										</Badge>
-									</TooltipTrigger>
-									<TooltipContent className="max-w-xs whitespace-pre-wrap">
-										{app.tags.slice(4).join(', ')}
-									</TooltipContent>
-								</Tooltip>
-							)}
-						</div>
+						<ShortDescription desc={app.shortDescription} />
+						<Tags tags={app.tags} />
 
 						<div className="flex items-center justify-between text-xs text-muted-foreground">
 							<Tooltip>
@@ -143,3 +95,63 @@ export default function AppCard({app}: {app: WinGetApp}) {
 		</Card>
 	);
 }
+
+export default memo(
+	AppCardComponent,
+	(prev, next) =>
+		prev.selected === next.selected && prev.app.id === next.app.id
+);
+
+function ShortDescription({desc}: {desc: string}) {
+	return (
+		<Tooltip delayDuration={800}>
+			<TooltipTrigger asChild>
+				<p className="text-xs text-muted-foreground mb-2 line-clamp-3">
+					{desc}
+				</p>
+			</TooltipTrigger>
+			<TooltipContent className="max-w-xs whitespace-pre-wrap">
+				{desc}
+			</TooltipContent>
+		</Tooltip>
+	);
+}
+
+
+function TagsComponent({tags}: {tags: string[]}) {
+	// Compute visible tags only if the array reference (or length) changes
+	const {visibleTags, extraCount, extraTagsString} = useMemo(() => {
+		const visibleTags = tags.slice(0, tags.length > 5 ? 4 : undefined);
+		return {
+			visibleTags,
+			extraCount: tags.length > 5 ? tags.length - 4 : 0,
+			extraTagsString: tags.slice(4).join(', ')
+		};
+	}, [tags]);
+
+	return (
+		<div className="flex items-center gap-2 mb-2 flex-wrap">
+			{visibleTags.map(tag => (
+				<Badge key={tag} variant="outline" className="text-xs">
+					{tag}
+				</Badge>
+			))}
+			{extraCount > 0 && (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Badge
+							variant="secondary"
+							className="text-xs cursor-pointer text-gray-600">
+							+{extraCount} more
+						</Badge>
+					</TooltipTrigger>
+					<TooltipContent className="max-w-xs whitespace-pre-wrap">
+						{extraTagsString}
+					</TooltipContent>
+				</Tooltip>
+			)}
+		</div>
+	);
+}
+
+const Tags = memo(TagsComponent, (prev, next) => prev.tags === next.tags);

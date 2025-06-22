@@ -48,8 +48,12 @@ type SortOption =
 	| 'releaseDateOldest';
 
 export default function WingetApps({apps}: {apps: WinGetApp[]}) {
-	const {selectedApps, setSelectedApps, installSelected} =
-		useContext(SelectedAppsContext);
+	const {
+		selectedApps,
+		installSelected,
+		isSelected,
+		toggleAppSelection
+	} = useContext(SelectedAppsContext);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -389,7 +393,12 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 						{/* {viewMode === 'grid' ? ( */}
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 							{paginatedApps.map(app => (
-								<AppCard key={app.id} app={app} />
+								<AppCard
+									key={app.id}
+									app={app}
+									selected={isSelected(app)}
+									onToggle={toggleAppSelection}
+								/>
 							))}
 						</div>
 						{/* ) : (
