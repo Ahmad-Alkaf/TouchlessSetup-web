@@ -32,6 +32,9 @@ export interface WinGetApp {
   /** Custom field `VerifiedSilence` – whether the app is verified to be installed silently. */
   verifiedSilence: boolean;
 
+  /** Custom field `Icon` – the icon of the app. */
+  icon?: string;
+
   /** `PublisherUrl` – vendor’s web page. */
   publisherUrl?: string;
 

@@ -2,7 +2,7 @@ import {Button} from '@/components/ui/button';
 import {ArrowRight, Blocks, MousePointerClick, PlugZap} from 'lucide-react';
 import Hero from './hero';
 import {SelectedApps} from './components/SelectedAppsContext';
-import Link from 'next/link';
+import Link from '@/components/ui/link';
 
 export default async function HomePage() {
 	return (
@@ -27,8 +27,7 @@ export default async function HomePage() {
 									packages straight from the{' '}
 									<Link
 										href="https://github.com/microsoft/winget-pkgs"
-										target="_blank"
-										className="text-blue-500 hover:underline">
+										target="_blank" >
 										official WinGet repository
 									</Link>
 									.
@@ -97,6 +96,18 @@ export default async function HomePage() {
 					</div>
 				</div>
 			</section>
+
+			<footer className="py-8 bg-gray-100 text-center text-sm text-gray-500 space-y-2">
+				<p>
+					<Link href="/terms" className="mr-4">
+						Terms of Use
+					</Link>
+					<Link href="/privacy">
+						Privacy Policy
+					</Link>
+				</p>
+				<p>© {new Date().getFullYear()} Touchless Setup</p>
+			</footer>
 		</main>
 	);
 }

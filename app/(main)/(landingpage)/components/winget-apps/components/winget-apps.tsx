@@ -40,12 +40,13 @@ import {SelectedAppsContext} from '../../SelectedAppsContext';
 import {Tooltip, TooltipContent} from '@/components/ui/tooltip';
 import {TooltipTrigger} from '@radix-ui/react-tooltip';
 import {AppListItem} from './app-item/app-list';
+import Link from '@/components/ui/link';
 
 type SortOption =
 	| 'nameAscending'
 	| 'nameDescending'
-	| 'releaseDateNewest'
-	| 'releaseDateOldest';
+	// | 'releaseDateNewest'
+	// | 'releaseDateOldest';
 
 export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 	const {
@@ -108,18 +109,18 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 		// Sort results
 		filtered.sort((a, b) => {
 			switch (sortBy) {
-				case 'releaseDateNewest':
-					return a.releaseDate == undefined
-						? 1
-						: b.releaseDate == undefined
-						? -1
-						: b.releaseDate.getTime() - a.releaseDate.getTime();
-				case 'releaseDateOldest':
-					return b.releaseDate == undefined
-						? 1
-						: a.releaseDate == undefined
-						? -1
-						: a.releaseDate.getTime() - b.releaseDate.getTime();
+				// case 'releaseDateNewest':
+				// 	return a.releaseDate == undefined
+				// 		? 1
+				// 		: b.releaseDate == undefined
+				// 		? -1
+				// 		: b.releaseDate.getTime() - a.releaseDate.getTime();
+				// case 'releaseDateOldest':
+				// 	return b.releaseDate == undefined
+				// 		? 1
+				// 		: a.releaseDate == undefined
+				// 		? -1
+				// 		: a.releaseDate.getTime() - b.releaseDate.getTime();
 				case 'nameDescending':
 					return b.name.localeCompare(a.name);
 				case 'nameAscending':
@@ -177,7 +178,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 				</Select>
 
 				<div className="text-sm text-muted-foreground">
-					Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+					Showing {(currentPage - 1) * itemsPerPage + (totalPages > 0 ? 1 : 0)} to{' '}
 					{Math.min(
 						currentPage * itemsPerPage,
 						filteredAndSortedApps.length
@@ -203,7 +204,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 					<ChevronLeft className="h-4 w-4" />
 				</Button>
 				<span className="text-sm">
-					Page {currentPage} of {totalPages}
+					Page {totalPages > 0 ? currentPage : 0} of {totalPages}
 				</span>
 				<Button
 					variant="outline"
@@ -211,14 +212,14 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 					onClick={() =>
 						setCurrentPage(prev => Math.min(totalPages, prev + 1))
 					}
-					disabled={currentPage === totalPages}>
+					disabled={currentPage === totalPages || totalPages === 0}>
 					<ChevronRight className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={() => setCurrentPage(totalPages)}
-					disabled={currentPage === totalPages}>
+					disabled={currentPage === totalPages || totalPages === 0}>
 					<ChevronsRight className="h-4 w-4" />
 				</Button>
 			</div>
@@ -267,12 +268,12 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 							<SelectItem value="nameDescending">
 								Name (Descending)
 							</SelectItem>
-							<SelectItem value="releaseDateNewest">
+							{/* <SelectItem value="releaseDateNewest">
 								Release Date (Newest First)
 							</SelectItem>
 							<SelectItem value="releaseDateOldest">
 								Release Date (Oldest First)
-							</SelectItem>
+							</SelectItem> */}
 						</SelectContent>
 					</Select>
 					{/* <Tooltip>
@@ -379,12 +380,12 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 				{filteredAndSortedApps.length === 0 ? (
 					<div className="text-center py-12 w-full">
 						<p className="text-muted-foreground">
-							No apps found matching your criteria
+							Did not find an app? Submit a issue to <Link href="https://github.com/microsoft/winget-pkgs/issues/new?template=package_request.yml" target="_blank" >Winget</Link>
 						</p>
 						<Button
 							variant="outline"
 							onClick={clearFilters}
-							className="mt-4">
+							className="mt-4 mb-4">
 							Clear Filters
 						</Button>
 					</div>
@@ -408,9 +409,9 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 								))}
 							</div>
 						 )} */}
-						<Pagination />
 					</>
 				)}
+				<Pagination />
 			</div>
 		</div>
 	);

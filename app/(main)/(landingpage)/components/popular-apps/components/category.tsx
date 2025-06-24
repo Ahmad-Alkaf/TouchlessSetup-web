@@ -20,39 +20,33 @@ import App from 'next/app';
 import {SelectedAppsContext} from '../../SelectedAppsContext';
 
 export default function Category({category}: {category: WinGetCategory}) {
-	const {toggleAppSelection, selectedApps, isSelected} = useContext(SelectedAppsContext);
+	const {toggleAppSelection, selectedApps, isSelected} =
+		useContext(SelectedAppsContext);
 	const selectedCount = category.apps.filter(app =>
 		selectedApps.map(v => v.id).includes(app.id)
 	).length;
 	if (category.apps.length === 0) return null;
 
 	return (
-		<Card key={category.name}>
-			<CardHeader className="pb-3">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center space-x-2">
-						<CardTitle className="text-base">
-							{category.name}
-						</CardTitle>
-						<Badge variant="secondary">
-							{selectedCount}/{category.apps.length}
-						</Badge>
-					</div>
+		<div className="grid gap-4">
+			<div className="flex items-center justify-between">
+				<div className="flex items-center space-x-2">
+					<CardTitle className="text-base">{category.name}</CardTitle>
+					<Badge variant="secondary">
+						{selectedCount}/{category.apps.length}
+					</Badge>
 				</div>
-			</CardHeader>
-			<CardContent>
-					<div className="grid grid-cols-2 gap-2">
-						{category.apps.map(app => (
-							<SimpleAppItem
-								key={app.id}
-								app={app}
-								isSelected={selectedApps
-									.map(v => v.id)
-									.includes(app.id)}
-							/>
-						))}
-					</div>
-			</CardContent>
-		</Card>
+			</div>
+
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+				{category.apps.map(app => (
+					<SimpleAppItem
+						key={app.id}
+						app={app}
+						isSelected={isSelected(app)}
+					/>
+				))}
+			</div>
+		</div>
 	);
 }

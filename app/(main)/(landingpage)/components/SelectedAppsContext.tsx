@@ -9,8 +9,7 @@ import {
 } from 'react';
 import PopularApps from './popular-apps/popular-apps';
 import WingetAppsCard from './winget-apps/winget-apps-card';
-import {Button} from '@/components/ui/button';
-import {Check, X} from 'lucide-react';
+import SelectedAppsActions from './selected-apps-actions/selected-apps-actions';
 
 type SelectedAppsContextType = {
 	selectedApps: WinGetApp[];
@@ -75,37 +74,15 @@ export function SelectedApps() {
 			}}>
 			<div className="max-w-6xl mx-auto p-6 space-y-6">
 				<PopularApps />
+				<SelectedAppsActions selectedApps={selectedApps.length} clearAllSelection={clearAllSelection} installSelected={installSelected} />
 				<WingetAppsCard />
-				<div className="space-y-4">
-					<div className="flex items-center justify-between">
-						<div>
-							<h3 className="text-lg font-semibold">
-								Selected Applications
-							</h3>
-							<p className="text-sm text-muted-foreground">
-								{selectedApps.length} apps selected
-							</p>
-						</div>
-						<div className="space-x-4">
-							<Button
-								disabled={selectedApps.length === 0}
-								variant="outline"
-								size="sm"
-								onClick={clearAllSelection}>
-								<X className="h-4 w-4 mr-1" />
-								Clear All Selection
-							</Button>
-
-							<Button
-								disabled={selectedApps.length === 0}
-								size="sm"
-								onClick={installSelected}>
-								<Check className="h-4 w-4 mr-1" />
-								Install Selected ({selectedApps.length})
-							</Button>
-						</div>
-					</div>
-				</div>
+				{wingetApps !== null && (
+					<SelectedAppsActions
+						selectedApps={selectedApps.length}
+						clearAllSelection={clearAllSelection}
+						installSelected={installSelected}
+					/>
+				)}
 			</div>
 		</SelectedAppsContext.Provider>
 	);

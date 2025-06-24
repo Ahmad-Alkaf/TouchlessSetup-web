@@ -25,12 +25,10 @@ export default function PopularApps() {
 				</p>
 			</div>
 			<CardContent>
-				<div className="space-y-6">
-					<div className="grid gap-4">
-						{CATEGORIES.map(category => (
-							<Category key={category.name} category={category} />
-						))}
-					</div>
+				<div className="grid gap-8">
+					{CATEGORIES.map(category => (
+						<Category key={category.name} category={category} />
+					))}
 				</div>
 			</CardContent>
 		</Card>

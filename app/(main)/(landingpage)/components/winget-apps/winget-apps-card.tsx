@@ -21,11 +21,10 @@ export default function WingetAppsCard() {
 						category => category.apps
 					);
 					apps =
-						apps?.map(v =>
-							categoriezedApps.some(c => c.id === v.id)
-								? {...v, verifiedSilence: true}
-								: v
-						) ?? null;
+						apps?.map(v => {
+							let app = categoriezedApps.find(c => c.id === v.id);
+							return app ? {...v, verifiedSilence: true, icon: app.icon} : v;
+						}) ?? null;
 					setWingetApps(apps);
 				})
 				.catch(console.error)

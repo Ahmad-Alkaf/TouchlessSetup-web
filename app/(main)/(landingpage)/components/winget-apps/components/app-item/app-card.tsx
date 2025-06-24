@@ -30,6 +30,15 @@ function AppCardComponent({app, selected, onToggle}: AppCardProps) {
 						onCheckedChange={() => onToggle(app)}
 						onClick={e => e.stopPropagation()}
 					/>
+					<img
+						height={28}
+						width={28}
+						src={
+							app.icon
+								? '/winget/apps-icon/' + app.icon
+								: '/winget/fallback/app-icon.svg'
+						}
+					/>
 					<h3
 						title={app.name}
 						className="font-semibold pointer-events-none text-sm truncate">

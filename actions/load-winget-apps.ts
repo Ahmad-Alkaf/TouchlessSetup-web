@@ -8,12 +8,17 @@ var APPS: WinGetApp[] | null = null;
 
 export default async function wingetApps(): Promise<WinGetApp[] | null> {
 	if (APPS === null) {
-		// The function may returns null even after it returns apps.
-		let apps = await downloadAndExtractAndLoadWingetRepo();
+		let apps: WinGetApp[] | null = null;
+		try {
+			// The function may returns null even after it returns apps.
+			apps = await downloadAndExtractAndLoadWingetRepo();
+		} catch (e) {
+			console.error(e);
+		}
 		if (apps === null) return APPS;
 		else if (Array.isArray(apps)) APPS = apps;
 		else console.error('Unexpected return type. Expected apps to be array but got: ' + apps)
-	}else console.log('Returning cached apps from server');
+	} else console.log('Returning cached apps from server');
 
 	return APPS;
 }

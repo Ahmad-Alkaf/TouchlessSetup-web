@@ -193,7 +193,7 @@ async function loadWinGetApps(): Promise<WinGetApp[]> {
 		const len = [...latest.keys()].length;
 
 		if (!latest.has(id))
-			console.log("[winget-loading] Adding " + ([...latest.keys()].length) + ' App: ' + (id) + ' : v' + version);
+			console.log("[winget-loading] Adding " + (len) + ' App: ' + (id) + ' : v' + version);
 		latest.set(id, {
 			id, name, version, shortDescription: desc, publisher: publisher,
 			verifiedSilence: false,
