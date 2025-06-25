@@ -4,7 +4,7 @@ import WingetApps from './components/winget-apps';
 import wingetApps from '@/actions/load-winget-apps';
 import {useContext, useEffect, useState} from 'react';
 import {SelectedAppsContext} from '../SelectedAppsContext';
-import Loading from '@/app/(main)/loading';
+import Loading from '@/app/(static)/loading';
 import {CATEGORIES} from '../popular-apps/components/CATEGORIES';
 import {WinGetApp} from '@/lib/type';
 

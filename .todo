@@ -1,6 +1,3 @@
-- In landpage: searchbar: If searched an app that not found, show "Did not find an app? Submit a issue to (The Package Provider)[https://github.com/winget-pkg/...etc].
-- In landpage: page add popular apps first then the search bar to add any app.
-- In landpage: add "We are just a pipline between Microsoft Products Windows 10/11 (The OS) and WinGet (The Package Manager)"
 
 Publish on 2025-06-30 plan:
 - 06-10: Finish UI. 

@@ -7,12 +7,15 @@ export function Terminal() {
   const [terminalStep, setTerminalStep] = useState(0);
   const [copied, setCopied] = useState(false);
   const terminalSteps = [
-    'git clone https://github.com/nextjs/saas-starter',
-    'npm install',
-    'npm db:setup',
-    'npm db:migrate',
-    'npm db:seed',
-    'npm dev 🎉',
+    '# PowerShell',
+    'irm https://touchlesssetup.com/install.ps1 | iex',
+    '# ---------------------------',
+    'winget install --id Google.Chrome        --silent',
+    'winget install --id Mozilla.Firefox      --silent',
+    'winget install --id VideoLAN.VLC         --silent',
+    'winget install --id Discord.Discord      --silent',
+    'winget install --id Spotify.Spotify      --silent',
+    'echo "✨  All done! Enjoy your fresh Windows!"',
   ];
 
   useEffect(() => {
@@ -20,7 +23,7 @@ export function Terminal() {
       setTerminalStep((prev) =>
         prev < terminalSteps.length - 1 ? prev + 1 : prev
       );
-    }, 500);
+    }, 900);
 
     return () => clearTimeout(timer);
   }, [terminalStep]);

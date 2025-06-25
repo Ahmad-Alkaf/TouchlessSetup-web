@@ -38,7 +38,7 @@ export default function SelectedAppsActions({
 						size="sm"
 						onClick={installSelected}>
 						<Check className="h-4 w-4 mr-1" />
-						Install Selected ({selectedApps})
+						Generate Installer ({selectedApps})
 					</Button>
 				</div>
 			</div>
