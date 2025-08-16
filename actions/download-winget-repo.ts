@@ -26,7 +26,7 @@ export default async function downloadAndExtractAndLoadWingetRepo(): Promise<Win
 		console.time('[winget] Loading apps took');
 		apps = await loadWinGetApps()
 		console.timeEnd('[winget] Loading apps took');
-		console.log('[winget] Done Loading', apps.length, ' winget-pkgs manifests files');
+		console.log('[winget] Done Loading', apps.length, 'winget-pkgs manifests files');
 		console.timeEnd('[winget] Total downloading & extracting & loading took');
 	});
 	return apps;
@@ -151,84 +151,86 @@ function compareVersion(a: string | undefined, b: string | undefined): number {
  * @param repoRoot absolute path to `<winget-pkgs>/`
  * @returns array of WinGetApp (latest version per PackageIdentifier)
  */
+// Updated loadWinGetApps to batch and parallelize file reads and parsing for performance improvements
 async function loadWinGetApps(): Promise<WinGetApp[]> {
 	const manifestsDir = path.join(DEST_DIR, 'manifests');
-	const latest = new Map<string, WinGetApp>();   // key: PackageIdentifier
-
+	const files: string[] = [];
+	// Gather all relevant yaml file paths
 	for await (const file of walk(manifestsDir)) {
 		const lf = file.toLowerCase();
-		// only process yaml/yml files
 		if (!(lf.endsWith('.yaml') || lf.endsWith('.yml'))) continue;
-
-		// skip locale helper manifests except en-us.
-		// Keep: root manifests (don't match ".locale.<lang>.yaml") and locale en-us files.
 		if (!/\.locale\.en-us\.ya?ml$/i.test(lf)) continue;
+		files.push(file);
+	}
 
-		const raw = await fs.readFile(file, 'utf8');
-		let manifest: any;
+	const latest = new Map<string, WinGetApp>();
+	const concurrency = 100; // limit concurrent file I/O to avoid resource exhaustion
+
+	// helper to process a single file
+	const processFile = async (file: string) => {
 		try {
-			manifest = parseYaml(raw);
+			const raw = await fs.readFile(file, 'utf8');
+			const manifest: any = parseYaml(raw);
+			const id = manifest.PackageIdentifier ?? manifest.Id;
+			const version = manifest.PackageVersion ?? manifest.Version;
+			const name = manifest.PackageName ?? manifest.Name ?? manifest.Moniker;
+			const desc = manifest.ShortDescription ?? manifest.Description;
+			const publisher = manifest.Publisher ?? manifest.Author;
+			if (!id || !version || !name || !desc || !publisher) {
+				console.warn('[winget-loading] Skipping "' + file + '" manifest file; missing required fields:', {
+					id, version, name, desc, publisher
+				})
+				return null;
+			}
+			return { manifest, id, version, name, desc, publisher };
 		} catch {
 			console.warn('[winget-loading] Skipping "' + file + '" yaml file; An exception occurred while parsing it, ignoring it and continuing...');
-			continue; // malformed YAML – ignore
+			return null;
 		}
+	};
 
-		// Required fields
-		const id = manifest.PackageIdentifier ?? manifest.Id;
-		const version = manifest.PackageVersion ?? manifest.Version;
-		const name = manifest.PackageName ?? manifest.Name ?? manifest.Moniker;
-		const desc = manifest.ShortDescription ?? manifest.Description;
-		const publisher = manifest.Publisher ?? manifest.Author;
+	// Process in batches for controlled parallelism
+	for (let i = 0; i < files.length; i += concurrency) {
+		const batch = files.slice(i, i + concurrency);
+		const results = await Promise.all(batch.map(processFile));
+		for (const res of results) {
+			if (!res) continue;
+			const { manifest, id, version, name, desc, publisher } = res;
+			const current = latest.get(id);
+			if (current && compareVersion(current.version, version) >= 0) {
+				// many are skipped, so we don't log them all
+				// console.log("[winget-loading] Skipping " + id + " : v" + version + ' (already have v' + current.version + ')');
+				continue;
+			}
+			if (!latest.has(id))
+				console.log("[winget-loading] Adding " + (latest.size + 1) + ' App: ' + (id) + ' : v' + version);
 
-		if (!id || !version || !name || !desc || !publisher) {
-			console.warn('[winget-loading] Skipping "' + file + '" manifest file; missing required fields:', {
-				id, version, name, desc, publisher,
+			const installers = Array.isArray(manifest.Installers) ? manifest.Installers : [];
+			const firstInst = installers[0] ?? {};
+			latest.set(id, {
+				id,
+				name,
+				version,
+				shortDescription: desc,
+				publisher,
+				verifiedSilence: false,
+				tags: Array.isArray(manifest.Tags) ? manifest.Tags : [],
+				description: manifest.Description ?? undefined,
+				publisherUrl: manifest.PublisherUrl ?? undefined,
+				releaseDate: manifest.ReleaseDate ? new Date(manifest.ReleaseDate) : undefined,
+				moniker: manifest.Moniker ?? undefined,
+				packageUrl: manifest.PackageUrl ?? manifest.Homepage ?? undefined,
+				supportUrl: manifest.SupportUrl ?? manifest.PublisherSupportUrl ?? undefined,
+				license: manifest.License ?? undefined,
+				licenseUrl: manifest.LicenseUrl ?? undefined,
+				copyright: manifest.Copyright ?? undefined,
+				copyrightUrl: manifest.CopyrightUrl ?? undefined,
+				installerType: firstInst.InstallerType ?? undefined,
+				installerSize: firstInst.InstallerSize ?? manifest.PackageSize ?? undefined,
+				downloadUrl: firstInst.InstallerUrl ?? undefined,
+				productCode: firstInst.ProductCode ?? undefined,
 			});
-			continue;
 		}
-
-		// keep *latest* version for each ID
-		const current = latest.get(id);
-		if (current && compareVersion(current.version, version) >= 0) {
-			console.log("[winget-loading] Skipping " + id + " : v" + version + ' (already have v' + current.version + ')');
-			continue;
-		}
-		/* 3.3 gather installer-level data ---------------------------------------- */
-		const installers = Array.isArray(manifest.Installers) ? manifest.Installers : [];
-		const firstInst = installers[0] ?? {};
-		const len = [...latest.keys()].length;
-
-		if (!latest.has(id))
-			console.log("[winget-loading] Adding " + (len) + ' App: ' + (id) + ' : v' + version);
-		// else
-		// 	console.log("[winget-loading] Updating " + (id) + ' version from v' + (latest.get(id)?.version) + ' to v' + version);
-		latest.set(id, {
-			id, name, version, shortDescription: desc, publisher: publisher,
-			verifiedSilence: false,
-			tags: Array.isArray(manifest.Tags) ? manifest.Tags : [],
-			description: manifest.Description ?? undefined,
-			publisherUrl: manifest.PublisherUrl ?? undefined,
-			releaseDate: manifest.ReleaseDate ? new Date(manifest.ReleaseDate) : undefined,
-			moniker: manifest.Moniker ?? undefined,
-			packageUrl: manifest.PackageUrl ?? manifest.Homepage ?? undefined,
-			supportUrl: manifest.SupportUrl ?? manifest.PublisherSupportUrl ?? undefined,
-			license: manifest.License ?? undefined,
-			licenseUrl: manifest.LicenseUrl ?? undefined,
-			copyright: manifest.Copyright ?? undefined,
-			copyrightUrl: manifest.CopyrightUrl ?? undefined,
-			// minOSVersion: manifest.MinimumOSVersion ?? undefined,
-			// iconUrl: manifest.Icons?.[0]?.Url ?? undefined,
-
-			/* installer-derived ----------------------------------------------------- */
-			installerType: firstInst.InstallerType ?? undefined,
-			installerSize: firstInst.InstallerSize ?? manifest.PackageSize ?? undefined,
-			downloadUrl: firstInst.InstallerUrl ?? undefined,
-			productCode: firstInst.ProductCode ?? undefined,
-
-
-			// releaseNotes: manifest.ReleaseNotesUrl ?? manifest.ReleaseNotes ?? undefined,
-			// sha256:        firstInst.InstallerSha256,
-		});
 	}
 
 	return [...latest.values()];
