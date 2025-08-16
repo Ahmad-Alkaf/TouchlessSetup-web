@@ -1,11 +1,12 @@
+'use client';
 import {Card, CardContent} from '@/components/ui/card';
 import Category from './components/category';
 import {CATEGORIES} from './components/CATEGORIES';
 import {useContext} from 'react';
-import {SelectedAppsContext} from '../SelectedAppsContext';
+import {SelectedAppsContext} from '../context';
 
 export default function PopularApps() {
-	const {wingetApps} = useContext(SelectedAppsContext);
+	const {apps: wingetApps} = useContext(SelectedAppsContext);
 	if (Array.isArray(wingetApps) && wingetApps.length > 0) {
 		CATEGORIES.forEach(category => {
 			category.apps.forEach(app => {

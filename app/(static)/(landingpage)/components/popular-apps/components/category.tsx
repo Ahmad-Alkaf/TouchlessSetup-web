@@ -17,7 +17,7 @@ import {Search, X, Plus, Check} from 'lucide-react';
 import {WinGetApp, WinGetCategory} from '@/lib/type';
 import SimpleAppItem from './simple-app-item';
 import App from 'next/app';
-import {SelectedAppsContext} from '../../SelectedAppsContext';
+import {SelectedAppsContext} from '../../context';
 
 export default function Category({category}: {category: WinGetCategory}) {
 	const {toggleAppSelection, selectedApps, isSelected} =

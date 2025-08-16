@@ -26,7 +26,7 @@ export default async function downloadAndExtractAndLoadWingetRepo(): Promise<Win
 		console.time('[winget] Loading apps took');
 		apps = await loadWinGetApps()
 		console.timeEnd('[winget] Loading apps took');
-		console.log('[winget] Done Loading winget-pkgs manifests files');
+		console.log('[winget] Done Loading', apps.length, ' winget-pkgs manifests files');
 		console.timeEnd('[winget] Total downloading & extracting & loading took');
 	});
 	return apps;
@@ -38,7 +38,7 @@ async function reallyDownloadAndExtractWingetRepo() {
 			if (process.env.NODE_ENV === 'development') {
 				console.log("[winget] repo already exists, skipping download and extraction on development mode");
 				return;
-			} else { // Repo shouldn't exist in production mode
+			} else { // Repo shouldn't exist in production mode. Either downloading it (which mean atomic operation is running) or exists at PUBLIC_DIR which is not the case here.
 				console.error("Unexpected code execution context reached! This error should never reached! Error Code: 49238");
 			}
 		}
@@ -156,20 +156,20 @@ async function loadWinGetApps(): Promise<WinGetApp[]> {
 	const latest = new Map<string, WinGetApp>();   // key: PackageIdentifier
 
 	for await (const file of walk(manifestsDir)) {
-		if (!file.endsWith('.yaml')) continue;
+		const lf = file.toLowerCase();
+		// only process yaml/yml files
+		if (!(lf.endsWith('.yaml') || lf.endsWith('.yml'))) continue;
 
-		// skip helper manifests (only grab the root manifest and locale en-us)
-		// Added: 3311
-		// Added: 3249
-		if (!file.match(/\.locale\.en-us\.yaml$/i))
-			continue;
+		// skip locale helper manifests except en-us.
+		// Keep: root manifests (don't match ".locale.<lang>.yaml") and locale en-us files.
+		if (!/\.locale\.en-us\.ya?ml$/i.test(lf)) continue;
 
 		const raw = await fs.readFile(file, 'utf8');
 		let manifest: any;
 		try {
 			manifest = parseYaml(raw);
 		} catch {
-			console.warn('An exception occur while parsing "' + file + '" yaml file, ignoring it and continuing...');
+			console.warn('[winget-loading] Skipping "' + file + '" yaml file; An exception occurred while parsing it, ignoring it and continuing...');
 			continue; // malformed YAML – ignore
 		}
 
@@ -180,11 +180,17 @@ async function loadWinGetApps(): Promise<WinGetApp[]> {
 		const desc = manifest.ShortDescription ?? manifest.Description;
 		const publisher = manifest.Publisher ?? manifest.Author;
 
-		if (!id || !version || !name || !desc || !publisher) continue;
+		if (!id || !version || !name || !desc || !publisher) {
+			console.warn('[winget-loading] Skipping "' + file + '" manifest file; missing required fields:', {
+				id, version, name, desc, publisher,
+			});
+			continue;
+		}
 
 		// keep *latest* version for each ID
 		const current = latest.get(id);
 		if (current && compareVersion(current.version, version) >= 0) {
+			console.log("[winget-loading] Skipping " + id + " : v" + version + ' (already have v' + current.version + ')');
 			continue;
 		}
 		/* 3.3 gather installer-level data ---------------------------------------- */
@@ -194,6 +200,8 @@ async function loadWinGetApps(): Promise<WinGetApp[]> {
 
 		if (!latest.has(id))
 			console.log("[winget-loading] Adding " + (len) + ' App: ' + (id) + ' : v' + version);
+		// else
+		// 	console.log("[winget-loading] Updating " + (id) + ' version from v' + (latest.get(id)?.version) + ' to v' + version);
 		latest.set(id, {
 			id, name, version, shortDescription: desc, publisher: publisher,
 			verifiedSilence: false,

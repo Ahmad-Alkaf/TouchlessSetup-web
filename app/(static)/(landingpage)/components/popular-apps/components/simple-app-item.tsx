@@ -2,7 +2,7 @@ import {Checkbox} from '@/components/ui/checkbox';
 import {Label} from '@/components/ui/label';
 import {type WinGetCategory} from '@/lib/type';
 import {useContext} from 'react';
-import {SelectedAppsContext} from '../../SelectedAppsContext';
+import {SelectedAppsContext} from '../../context';
 
 export default function SimpleAppItem({
 	app,

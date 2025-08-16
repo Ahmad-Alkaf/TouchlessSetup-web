@@ -1,17 +1,13 @@
+'use client';
 import {Button} from '@/components/ui/button';
-import {WinGetApp} from '@/lib/type';
 import {X} from 'lucide-react';
 import {Check} from 'lucide-react';
+import {useContext} from 'react';
+import {SelectedAppsContext} from '../context';
 
-export default function SelectedAppsActions({
-	selectedApps,
-	clearAllSelection,
-	installSelected
-}: {
-	selectedApps: number;
-	clearAllSelection: () => void;
-	installSelected: () => void;
-}) {
+export default function SelectedAppsActions() {
+	const {clearAllSelection, installSelected, selectedApps} =
+		useContext(SelectedAppsContext);
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
@@ -20,12 +16,12 @@ export default function SelectedAppsActions({
 						Selected Applications
 					</h3>
 					<p className="text-sm text-muted-foreground">
-						{selectedApps} apps selected
+						{selectedApps.length} apps selected
 					</p>
 				</div>
-				<div className="space-x-4">
+				<div className="space-x-4 flex md:flex-row flex-col space-y-4">
 					<Button
-						disabled={selectedApps === 0}
+						disabled={selectedApps.length === 0}
 						variant="outline"
 						size="sm"
 						onClick={clearAllSelection}>
@@ -34,11 +30,11 @@ export default function SelectedAppsActions({
 					</Button>
 
 					<Button
-						disabled={selectedApps === 0}
+						disabled={selectedApps.length === 0}
 						size="sm"
 						onClick={installSelected}>
 						<Check className="h-4 w-4 mr-1" />
-						Generate Installer ({selectedApps})
+						Generate Installer ({selectedApps.length})
 					</Button>
 				</div>
 			</div>
