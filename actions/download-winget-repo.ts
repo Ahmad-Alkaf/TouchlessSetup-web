@@ -16,20 +16,25 @@ const URL = `https://api.github.com/repos/microsoft/${REPO}/zipball/${BRANCH}`;
 const PUBLIC_DIR = path.join(process.cwd(), 'public', 'winget');
 export const DEST_DIR = path.join(PUBLIC_DIR, REPO);
 
-// Takes long time
-export default async function downloadAndExtractAndLoadWingetRepo(): Promise<WinGetApp[] | null> {
-	let apps: WinGetApp[] | null = null;
-	await atomicOperation('downloading-winget', async () => {
-		console.time('[winget] Total downloading & extracting & loading took');
+
+// Startup-specific version that bypasses atomic operation for faster initialization
+export async function downloadAndExtractAndLoadWingetRepoForStartup(): Promise<WinGetApp[] | null> {
+	console.log('[startup] Starting WinGet repository download and extraction...');
+	console.time('[startup] Total downloading & extracting & loading took');
+	
+	try {
 		await reallyDownloadAndExtractWingetRepo();
-		console.log('[winget] Loading winget-pkgs manifests files...');
-		console.time('[winget] Loading apps took');
-		apps = await loadWinGetApps()
-		console.timeEnd('[winget] Loading apps took');
-		console.log('[winget] Done Loading', apps.length, 'winget-pkgs manifests files');
-		console.timeEnd('[winget] Total downloading & extracting & loading took');
-	});
-	return apps;
+		console.log('[startup] Loading winget-pkgs manifests files...');
+		console.time('[startup] Loading apps took');
+		const apps = await loadWinGetApps();
+		console.timeEnd('[startup] Loading apps took');
+		console.log('[startup] Done Loading', apps.length, 'winget-pkgs manifests files');
+		console.timeEnd('[startup] Total downloading & extracting & loading took');
+		return apps;
+	} catch (error) {
+		console.error('[startup] Error in downloadAndExtractAndLoadWingetRepoForStartup:', error);
+		return null;
+	}
 }
 
 async function reallyDownloadAndExtractWingetRepo() {
