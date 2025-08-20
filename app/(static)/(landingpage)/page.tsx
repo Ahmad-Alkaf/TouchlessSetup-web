@@ -14,7 +14,8 @@ export default async function HomePage() {
 			<Hero />
 
 			<Context>
-				<div className="max-w-6xl mx-auto p-6 space-y-6">
+				{/* Overlap the hero: pull up with negative margin and ensure on top with z-index */}
+				<div className="relative -mt-32 max-w-6xl mx-auto p-6 space-y-6">
 					<PopularApps />
 					<SelectedAppsActions />
 					<RenderIfAllAppsExist>
@@ -27,7 +28,7 @@ export default async function HomePage() {
 
 			<CallToAction />
 
-			<footer className="py-8 bg-gray-100 text-center text-sm text-gray-500 space-y-2">
+			<footer className="py-8 bg-[#A8C7DC] text-center text-sm space-y-2">
 				<p>
 					<Link href="/terms" className="mr-4">
 						Terms of Use

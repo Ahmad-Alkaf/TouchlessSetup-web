@@ -18,6 +18,7 @@ import Link from '@/components/ui/link';
 import Pagination from './components/pagination';
 import {SortOption} from '@/actions/load-winget-apps';
 import Loading from '@/app/(static)/loading';
+import GenerateInstallerBtn from '../../selected-apps-actions/generate-installer-btn';
 
 export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 	const {
@@ -90,7 +91,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 							className="pl-10"
 						/>
 					</div>
-					<Select
+					{/* <Select
 						value={sortBy}
 						onValueChange={(value: SortOption) => setSortBy(value)}>
 						<SelectTrigger className="w-48">
@@ -102,15 +103,15 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 							</SelectItem>
 							<SelectItem value="nameDescending">
 								Name (Descending)
-							</SelectItem>
+							</SelectItem> */}
 							{/* <SelectItem value="releaseDateNewest">
 								Release Date (Newest First)
 							</SelectItem>
 							<SelectItem value="releaseDateOldest">
 								Release Date (Oldest First)
 							</SelectItem> */}
-						</SelectContent>
-					</Select>
+						{/* </SelectContent>
+					</Select> */}
 					{/* <Tooltip>
 						<TooltipTrigger asChild>
 							<Button
@@ -200,12 +201,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 						</span>
 					</div>
 					<div className="flex items-center gap-2">
-						{selectedApps.length > 0 && (
-							<Button size="sm" onClick={installSelected}>
-								<Check className="h-4 w-4 mr-1" />
-								Install Selected ({selectedApps.length})
-							</Button>
-						)}
+						<GenerateInstallerBtn hideCheck={true} />
 					</div>
 				</div>
 			</div>

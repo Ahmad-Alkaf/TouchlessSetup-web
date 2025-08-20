@@ -4,6 +4,7 @@ import {X} from 'lucide-react';
 import {Check} from 'lucide-react';
 import {useContext} from 'react';
 import {SelectedAppsContext} from '../context';
+import GenerateInstallerBtn from './generate-installer-btn';
 
 export default function SelectedAppsActions() {
 	const {clearAllSelection, installSelected, selectedApps} =
@@ -28,14 +29,8 @@ export default function SelectedAppsActions() {
 						<X className="h-4 w-4 mr-1" />
 						Clear All Selection
 					</Button>
+					<GenerateInstallerBtn/>
 
-					<Button
-						disabled={selectedApps.length === 0}
-						size="sm"
-						onClick={installSelected}>
-						<Check className="h-4 w-4 mr-1" />
-						Generate Installer ({selectedApps.length})
-					</Button>
 				</div>
 			</div>
 		</div>

@@ -5,7 +5,7 @@ import {useContext} from 'react';
 import {SelectedAppsContext} from '../context';
 import Loading from '@/app/(static)/loading';
 import {WinGetApp} from '@/lib/type';
-import {TotalApps} from '../../helpers/totalApps';
+import {TotalApps} from '../../helpers/total-apps';
 
 export default function WingetAppsCard() {
 	const {apps, isLoading, totalApps} = useContext(SelectedAppsContext);

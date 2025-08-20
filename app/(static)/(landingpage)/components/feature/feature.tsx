@@ -1,6 +1,6 @@
 import {Blocks, MousePointerClick, PlugZap} from 'lucide-react';
 import Link from 'next/link';
-import {TotalApps} from '../../helpers/totalApps';
+import {TotalApps} from '../../helpers/total-apps';
 
 export function Feature() {
 	return (

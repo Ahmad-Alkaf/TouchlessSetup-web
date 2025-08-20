@@ -5,38 +5,78 @@ import Image from 'next/image';
 
 export default function Hero() {
 	return (
-		<section className="relative overflow-hidden py-24 bg-gradient-to-b from-white to-gray-50">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-16">
-				{/* Copy */}
-				<div className="text-center md:text-left max-w-2xl">
-					<h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 bg-clip-text text-transparent sm:text-6xl leading-tight">
-						Install your essential apps in one go
-					</h1>
-					<p className="mt-6 text-lg text-gray-600">
-						Pick what you need, hit <strong>Generate&nbsp;Installer</strong>, and download a single file that sets up your PC while you get on with more important things.
-					</p>
-					<div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-						<Link href="#popular-apps">
-							<Button size="lg" className="px-8 text-lg rounded-full" variant="outline">
-								Build Your Installer
-								<ArrowRight className="ml-2 h-5 w-5" />
-							</Button>
-						</Link>
-						{/* Placeholder secondary CTA if needed */}
-					</div>
-				</div>
-
-				{/* Image placeholder */}
-				<div className="w-full md:w-auto flex justify-center md:justify-end">
-					{/* Replace the src below with your custom hero image */}
+		<section className="relative lg:bg-[#A8C7DC] lg:aspect-[1242/580]">
+			{/* Background image for Desktop - hidden on mobile */}
+			<div className="hidden lg:block absolute inset-0">
+				<div
+					className="relative w-full h-full"
+					style={{
+						maskImage:
+							'linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.1) 35%, white 50%)',
+						WebkitMaskImage:
+							'linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.1) 35%, white 50%)'
+					}}>
 					<Image
-						src="/hero-placeholder.svg"
+						src="/desktop-examples/chosen.png"
 						alt="Illustration of automated Windows setup"
-						width={500}
-						height={400}
-						className="w-full max-w-md h-auto object-contain"
+						fill
+						className="object-cover object-left"
+						style={{
+							transform: 'translateX(26%)',
+						}}
+						quality={100}
+						unoptimized={false}
+						priority
 					/>
 				</div>
+			</div>
+
+			{/* Content overlay */}
+			<div className="relative z-10 h-full flex items-center pt-6 lg:pt-0">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+					<div className="flex flex-col lg:flex-row items-center h-full">
+						{/* Copy - positioned on the left with solid white background */}
+						<div className=" text-center lg:text-left max-w-full lg:max-w-lg">
+							<h1
+								className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 bg-clip-text text-transparent sm:text-5xl leading-tight"
+								style={{ textShadow: '0 0 8px rgba(56, 189, 248, 0.4)' }}
+							>
+								Install Your Apps
+								<br /> in One GO
+							</h1>
+							<p className="mt-6 max-w-xl lg:max-w-4xl text-lg text-gray-700 font-medium">
+								Pick what you need, hit{' '}
+								<strong>Generate&nbsp;Installer</strong>, and
+								download a single file that sets up your PC
+								while you get on with more important things.
+							</p>
+							<div className="mt-8 flex lg:hidden justify-center lg:justify-start">
+								<Link href="#popular-apps">
+									<Button
+										size="lg"
+										className="px-8 text-lg rounded-full"
+										variant="outline">
+										Build Your Installer
+										<ArrowRight className="ml-2 h-5 w-5" />
+									</Button>
+								</Link>
+								{/* Placeholder secondary CTA if needed */}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{/* Image for Mobile - hidden on desktop */}
+			<div className="block lg:hidden mt-12">
+				<Image
+					src="/desktop-examples/cropped-mobile.png"
+					alt="Illustration of automated Windows setup"
+					width={1242}
+					height={380}
+					className="w-full h-auto object-contain"
+					quality={90}
+					priority
+				/>
 			</div>
 		</section>
 	);
