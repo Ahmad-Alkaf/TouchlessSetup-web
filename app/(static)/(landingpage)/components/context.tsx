@@ -8,9 +8,6 @@ import {
 	useCallback,
 	useEffect
 } from 'react';
-import PopularApps from './popular-apps/popular-apps';
-import WingetAppsCard from './winget-apps/winget-apps-card';
-import SelectedAppsActions from './selected-apps-actions/selected-apps-actions';
 import loadWingetApps, {
 	type LoadWingetAppsRet,
 	type SortOption
@@ -99,7 +96,6 @@ export function Context({children}: {children: React.ReactNode}) {
 	};
 
 	useEffect(() => {
-		console.log('Calling wingetApps from client');
 		setIsLoading(true);
 		loadWingetApps(take, skip, searchTerm, sortBy)
 			.then((data: LoadWingetAppsRet) => {

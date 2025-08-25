@@ -9,18 +9,18 @@ export type SortOption =
 	| 'nameAscending'
 	| 'nameDescending'
 	| 'popular'
-	// | 'releaseDateNewest'
-	// | 'releaseDateOldest';
+// | 'releaseDateNewest'
+// | 'releaseDateOldest';
 
-export default async function loadWingetApps(take: number, skip: number, search: string, sortBy:SortOption): Promise<LoadWingetAppsRet> {
+export default async function loadWingetApps(take: number, skip: number, search: string, sortBy: SortOption): Promise<LoadWingetAppsRet> {
 	// Get cached apps or wait for them to load
 	const allApps = await getCachedWingetApps();
-	
+
 	if (allApps == null) {
 		console.error('Failed to load WinGet apps');
 		return null;
 	}
-	
+
 	console.log(`Returning ${allApps.length} cached apps from server`);
 	// Sanitize numeric inputs
 	take = Number.isFinite(take) ? Math.max(0, Math.floor(take)) : 20;
@@ -36,7 +36,7 @@ export default async function loadWingetApps(take: number, skip: number, search:
 			|| a.publisher.toUpperCase().includes(up)
 			|| a.shortDescription.toUpperCase().includes(up)
 			|| (a.description && a.description.toUpperCase().includes(up))
-			|| a.tags.some(t => t.toUpperCase().includes(up))
+			|| a.tags.some(t => t?.toUpperCase().includes(up))
 		);
 	}
 
