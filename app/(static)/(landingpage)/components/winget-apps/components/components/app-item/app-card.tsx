@@ -67,9 +67,7 @@ function AppCardComponent({app, selected, onToggle}: AppCardProps) {
 							<TooltipTrigger>
 								<div className="flex items-center gap-1">
 									<Clock className="h-3 w-3" />
-									<span>
-										{formatDate(app.releaseDate)}
-									</span>
+									<span>{formatDate(app.releaseDate)}</span>
 								</div>
 							</TooltipTrigger>
 							<TooltipContent>
@@ -91,15 +89,15 @@ export default memo(
 
 function Publisher({publisher}: {publisher: string}) {
 	return (
-		<Tooltip delayDuration={800} >
+		<Tooltip delayDuration={800}>
 			<TooltipTrigger>
-				<div className="flex items-center gap-1">
-					<Building2 className="h-3 w-3" />
-					<span>{publisher}</span>
+				<div className="flex items-center gap-1 max-w-[120px]">
+					<Building2 className="h-3 w-3 flex-shrink-0" />
+					<span className="truncate">{publisher}</span>
 				</div>
 			</TooltipTrigger>
 			<TooltipContent>
-				<p>Publisher</p>
+				<p>Publisher: {publisher}</p>
 			</TooltipContent>
 		</Tooltip>
 	);
@@ -111,11 +109,11 @@ function Version({version}: {version: string}) {
 			<TooltipTrigger>
 				<div className="flex items-center gap-1">
 					<Tag className="h-3 w-3" />
-					<span>{version}</span>
+					<span className="truncate">{version}</span>
 				</div>
 			</TooltipTrigger>
 			<TooltipContent>
-				<p>Version</p>
+				<p>Version: {version}</p>
 			</TooltipContent>
 		</Tooltip>
 	);

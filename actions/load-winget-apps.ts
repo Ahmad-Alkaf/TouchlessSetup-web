@@ -36,7 +36,7 @@ export default async function loadWingetApps(take: number, skip: number, search:
 			|| a.publisher.toUpperCase().includes(up)
 			|| a.shortDescription.toUpperCase().includes(up)
 			|| (a.description && a.description.toUpperCase().includes(up))
-			|| a.tags.some(t => t?.toUpperCase().includes(up))
+			|| a.tags.some(t => t?.toString().toUpperCase().includes(up))
 		);
 	}
 
