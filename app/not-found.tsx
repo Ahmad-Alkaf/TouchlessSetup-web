@@ -43,7 +43,7 @@ export default function NotFound() {
 							</Button>
 						</Link>
 
-						<Link href="/showcase">
+						{/* <Link href="/showcase">
 							<Button
 								size="lg"
 								variant="outline"
@@ -51,7 +51,7 @@ export default function NotFound() {
 								<Compass className="h-5 w-5 mr-2" />
 								Explore Apps
 							</Button>
-						</Link>
+						</Link> */}
 					</div>
 
 					{/* Helpful Links */}

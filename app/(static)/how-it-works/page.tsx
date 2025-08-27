@@ -1,33 +1,43 @@
-import { Button } from '@/components/ui/button';
-import { 
-	MousePointerClick, 
-	Download, 
-	Rocket, 
-	CheckCircle, 
-	ArrowRight, 
+import {Button} from '@/components/ui/button';
+import {
+	MousePointerClick,
+	Rocket,
+	CheckCircle,
+	ArrowRight,
 	Zap,
 	Shield,
 	Clock,
 	Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import {getCachedWingetApps} from '@/lib/startup/cache-winget-apps';
+import {FormatTotalApps} from '../../../components/shared/format-total-apps';
 
 export const metadata = {
 	title: 'How It Works | Touchless Setup',
-	description: 'Learn how Touchless Setup transforms hours of manual installation into minutes of automation. Simple, secure, and powered by Microsoft WinGet.'
+	description:
+		'Learn how Touchless Setup transforms hours of manual installation into minutes of automation. Simple, secure, and powered by Microsoft WinGet.'
 };
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+	let totalApps: number | undefined = undefined;
+	try {
+		totalApps = (await getCachedWingetApps())?.length;
+	} catch (e) {
+		console.error(e);
+	}
 	const steps = [
 		{
 			step: '1',
 			title: 'Browse & Select',
-			description: 'Choose from thousands of apps in our curated catalog. From development tools to creative software, we\'ve got everything you need.',
+			description:
+				"Choose from thousands of apps in our curated catalog. From development tools to creative software, we've got everything you need.",
 			icon: MousePointerClick,
 			color: 'from-blue-500 to-indigo-600',
 			details: [
-				'Search through 15,000+ verified apps',
+				'Search through ' +
+					FormatTotalApps(totalApps) +
+					' verified apps',
 				'Filter by categories and popularity',
 				'Read descriptions and version info',
 				'See download counts and ratings'
@@ -36,7 +46,8 @@ export default function HowItWorksPage() {
 		{
 			step: '2',
 			title: 'Generate Installer',
-			description: 'Our magic happens here! We bundle your selections into a single, lightweight executable that installs everything silently.',
+			description:
+				'Our magic happens here! We bundle your selections into a single, lightweight executable that installs everything silently.',
 			icon: Zap,
 			color: 'from-emerald-500 to-green-600',
 			details: [
@@ -49,7 +60,8 @@ export default function HowItWorksPage() {
 		{
 			step: '3',
 			title: 'Run & Relax',
-			description: 'Double-click your installer and watch the magic happen. No prompts, no babysitting - just pure automation while you grab coffee.',
+			description:
+				'Double-click your installer and watch the magic happen. No prompts, no babysitting - just pure automation while you grab coffee.',
 			icon: Rocket,
 			color: 'from-purple-500 to-violet-600',
 			details: [
@@ -65,17 +77,20 @@ export default function HowItWorksPage() {
 		{
 			icon: Clock,
 			title: 'Save Hours of Time',
-			description: 'What used to take 2-3 hours now takes 5 minutes. Set it up once and forget about it.'
+			description:
+				'What used to take 2-3 hours now takes 5 minutes. Set it up once and forget about it.'
 		},
 		{
 			icon: Shield,
 			title: 'Completely Safe',
-			description: 'Powered by Microsoft WinGet - all apps come from official sources and verified publishers.'
+			description:
+				'Powered by Microsoft WinGet - all apps come from official sources and verified publishers.'
 		},
 		{
 			icon: Sparkles,
 			title: 'Zero Bloatware',
-			description: 'Clean installations with no unwanted extras, toolbars, or hidden software sneaking in.'
+			description:
+				'Clean installations with no unwanted extras, toolbars, or hidden software sneaking in.'
 		}
 	];
 
@@ -91,8 +106,9 @@ export default function HowItWorksPage() {
 						</span>
 					</h1>
 					<p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-						Transform hours of tedious manual installation into minutes of pure automation. 
-						Here's how we make setting up your PC ridiculously simple.
+						Transform hours of tedious manual installation into
+						minutes of pure automation. Here's how we make setting
+						up your PC ridiculously simple.
 					</p>
 				</div>
 			</section>
@@ -102,23 +118,32 @@ export default function HowItWorksPage() {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="space-y-20">
 						{steps.map((step, index) => (
-							<div key={step.step} className={`flex flex-col lg:flex-row items-center gap-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+							<div
+								key={step.step}
+								className={`flex flex-col lg:flex-row items-center gap-12 ${
+									index % 2 === 1 ? 'lg:flex-row-reverse' : ''
+								}`}>
 								{/* Content */}
 								<div className="flex-1 space-y-6">
 									<div className="flex items-center gap-4">
-										<div className={`w-12 h-12 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+										<div
+											className={`w-12 h-12 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
 											{step.step}
 										</div>
-										<h2 className="text-3xl font-bold text-gray-900">{step.title}</h2>
+										<h2 className="text-3xl font-bold text-gray-900">
+											{step.title}
+										</h2>
 									</div>
-									
+
 									<p className="text-lg text-gray-600 leading-relaxed">
 										{step.description}
 									</p>
 
 									<ul className="space-y-3">
 										{step.details.map((detail, idx) => (
-											<li key={idx} className="flex items-center gap-3 text-gray-700">
+											<li
+												key={idx}
+												className="flex items-center gap-3 text-gray-700">
 												<CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
 												{detail}
 											</li>
@@ -128,7 +153,8 @@ export default function HowItWorksPage() {
 
 								{/* Icon/Visual */}
 								<div className="flex-1 flex justify-center">
-									<div className={`w-64 h-64 rounded-3xl bg-gradient-to-r ${step.color} flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300`}>
+									<div
+										className={`w-64 h-64 rounded-3xl bg-gradient-to-r ${step.color} flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300`}>
 										<step.icon className="h-32 w-32 text-white" />
 									</div>
 								</div>
@@ -146,18 +172,26 @@ export default function HowItWorksPage() {
 							Why People Love It
 						</h2>
 						<p className="text-xl text-gray-600 max-w-2xl mx-auto">
-							Perfect for anyone setting up a new PC or recovering from a format. We understand the pain of manual installations.
+							Perfect for anyone setting up a new PC or recovering
+							from a format. We understand the pain of manual
+							installations.
 						</p>
 					</div>
 
 					<div className="grid md:grid-cols-3 gap-8">
 						{benefits.map((benefit, index) => (
-							<div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+							<div
+								key={index}
+								className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
 								<div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mb-6">
 									<benefit.icon className="h-6 w-6 text-white" />
 								</div>
-								<h3 className="text-xl font-bold text-gray-900 mb-4">{benefit.title}</h3>
-								<p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+								<h3 className="text-xl font-bold text-gray-900 mb-4">
+									{benefit.title}
+								</h3>
+								<p className="text-gray-600 leading-relaxed">
+									{benefit.description}
+								</p>
 							</div>
 						))}
 					</div>
@@ -172,7 +206,8 @@ export default function HowItWorksPage() {
 							Under the Hood
 						</h2>
 						<p className="text-xl text-gray-600">
-							Powered by Microsoft's own package manager for ultimate reliability.
+							Powered by Microsoft's own package manager for
+							ultimate reliability.
 						</p>
 					</div>
 
@@ -183,16 +218,30 @@ export default function HowItWorksPage() {
 						</h3>
 						<div className="space-y-4 text-gray-300">
 							<p className="leading-relaxed">
-								<strong className="text-white">WinGet</strong> is Microsoft's official package manager for Windows. 
-								Every app in our catalog comes directly from verified publishers and goes through Microsoft's security validation.
+								<strong className="text-white">WinGet</strong>{' '}
+								is Microsoft's official package manager for
+								Windows. Every app in our catalog comes directly
+								from verified publishers and goes through
+								Microsoft's security validation.
 							</p>
 							<p className="leading-relaxed">
-								Your custom installer essentially becomes a smart batch of WinGet commands, executing them in the optimal order 
-								for fastest installation with automatic dependency resolution.
+								Your custom installer essentially becomes a
+								smart batch of WinGet commands, executing them
+								in the optimal order for fastest installation
+								with automatic dependency resolution.
 							</p>
 							<p className="leading-relaxed">
-								<strong className="text-white">No third-party downloads.</strong> <strong className="text-white">No modified installers.</strong> 
-								<strong className="text-white"> Just official software, delivered efficiently.</strong>
+								<strong className="text-white">
+									No third-party downloads.
+								</strong>{' '}
+								<strong className="text-white">
+									No modified installers.
+								</strong>
+								<strong className="text-white">
+									{' '}
+									Just official software, delivered
+									efficiently.
+								</strong>
 							</p>
 						</div>
 					</div>
@@ -206,13 +255,13 @@ export default function HowItWorksPage() {
 						Ready to Save Hours of Your Life?
 					</h2>
 					<p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-						Join thousands of people who've already discovered the joy of automated PC setup.
+						Join thousands of people who've already discovered the
+						joy of automated PC setup.
 					</p>
 					<Link href="/#popular-apps">
-						<Button 
-							size="lg" 
-							className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
-						>
+						<Button
+							size="lg"
+							className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200">
 							<Rocket className="mr-3 h-6 w-6" />
 							Start Building Your Installer
 							<ArrowRight className="ml-3 h-6 w-6" />

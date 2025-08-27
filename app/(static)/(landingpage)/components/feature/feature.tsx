@@ -1,6 +1,6 @@
 import {Blocks, MousePointerClick, PlugZap, Coffee} from 'lucide-react';
 import Link from 'next/link';
-import {TotalApps} from '../../helpers/total-apps';
+import {TotalApps} from '../../../../../components/shared/total-apps';
 
 export function Feature() {
 	return (

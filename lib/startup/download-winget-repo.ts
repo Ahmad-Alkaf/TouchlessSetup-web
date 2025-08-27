@@ -1,136 +1,46 @@
 import 'server-only'
-import fsS from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { tmpdir } from 'node:os';
-import { pipeline } from 'node:stream/promises';
-import StreamZip from 'node-stream-zip';
-import { atomicOperation } from './components/atomic-operation';
+import { atomicOperation } from '../../actions/components/atomic-operation';
 import { parse as parseYaml } from 'yaml';
 import { type WinGetApp } from '@/lib/type';
-import { ReadableStream } from 'node:stream/web'
+import { downloadAndExtractGitHubRepo } from './github-repo-downloader';
 
 const REPO = 'winget-pkgs';
-const BRANCH = 'master';                         // or main
-const URL = `https://api.github.com/repos/microsoft/${REPO}/zipball/${BRANCH}`;
-const PUBLIC_DIR = path.join(process.cwd(), 'public', 'winget');
-export const DEST_DIR = path.join(PUBLIC_DIR, REPO);
+const BRANCH = 'master';
+const OWNER = 'microsoft';
+const PRIVATE_DIR = path.join(process.cwd(), 'private', 'winget');
+const DEST_DIR = path.join(PRIVATE_DIR, REPO);
 
 
 // Startup-specific version that bypasses atomic operation for faster initialization
 export async function downloadAndExtractAndLoadWingetRepoForStartup(): Promise<WinGetApp[] | null> {
-	console.log('[startup] Starting WinGet repository download and extraction...');
-	console.time('[startup] Total downloading & extracting & loading took');
-	
+	console.log('[winget-startup] Starting WinGet repository download and extraction...');
+	console.time('[winget-startup] Total downloading & extracting & loading took');
+
 	try {
 		await reallyDownloadAndExtractWingetRepo();
-		console.log('[startup] Loading winget-pkgs manifests files...');
-		console.time('[startup] Loading apps took');
+		console.log('[winget-startup] Loading winget-pkgs manifests files...');
+		console.time('[winget-startup] Loading apps took');
 		const apps = await loadWinGetApps();
-		console.timeEnd('[startup] Loading apps took');
-		console.log('[startup] Done Loading', apps.length, 'winget-pkgs manifests files');
-		console.timeEnd('[startup] Total downloading & extracting & loading took');
+		console.timeEnd('[winget-startup] Loading apps took');
+		console.log('[winget-startup] Done Loading', apps.length, 'winget-pkgs manifests files');
+		console.timeEnd('[winget-startup] Total downloading & extracting & loading took');
 		return apps;
 	} catch (error) {
-		console.error('[startup] Error in downloadAndExtractAndLoadWingetRepoForStartup:', error);
+		console.error('[winget-startup] Error in downloadAndExtractAndLoadWingetRepoForStartup:', error);
 		return null;
 	}
 }
 
 async function reallyDownloadAndExtractWingetRepo() {
-	try {
-		if (await fs.access(DEST_DIR).then(() => true).catch(() => false)) {
-			if (process.env.NODE_ENV === 'development') {
-				console.log("[winget] repo already exists, skipping download and extraction on development mode");
-				return;
-			} else { // Repo shouldn't exist in production mode. Either downloading it (which mean atomic operation is running) or exists at PUBLIC_DIR which is not the case here.
-				console.error("Unexpected code execution context reached! This error should never reached! Error Code: 49238");
-			}
-		}
-		console.log('[winget] Start downloading ' + URL + ' repo.');
-
-		await fs.mkdir(PUBLIC_DIR, { recursive: true }); // in case /public is missing
-
-		console.time('[winget] Downloading took');
-		const res = await fetch(URL, {
-			headers: {
-				'User-Agent': 'nextjs-app',
-			},
-			redirect: 'follow', // the API answers 302 first
-			cache: 'no-store'
-		});
-
-		if (!res.ok) {
-			console.error(`[Winget] GitHub responded with error:`, {
-				status: res.status,
-				statusText: res.statusText,
-				headers: Object.fromEntries(res.headers.entries()),
-				url: res.url
-			});
-			return;
-		} else console.log('[Winget] GitHub responded - OK');
-
-		const tmpZip = path.join(tmpdir(), `${REPO}.zip`);
-		if (res.body == null) {
-			console.error('[Winget] GitHub respond body is null');
-			return;
-		}
-		console.log('[winget] Downloading the Winget packages zip folder...');
-		await pipeline(res.body as unknown as ReadableStream, fsS.createWriteStream(tmpZip));
-		console.timeEnd('[winget] Downloading took');
-		console.log('[winget] Done Downloading the zip folder');
-
-		console.log('[winget] Extracting the zip folder using node-stream-zip...');
-		console.time('[winget] Extracting took');
-		const zip = new StreamZip.async({ file: tmpZip, storeEntries: true });
-		await zip.extract(null, PUBLIC_DIR);
-		await zip.close();
-		console.timeEnd('[winget] Extracting took');
-		console.log('[winget] Done Extracting the zip folder');
-
-		console.log('[winget] Renaming the extracted zip folder...');
-		console.time('[winget] Renaming took');
-		const extractedRoot = (await fs
-			.readdir(PUBLIC_DIR))
-			.find((d) => d.startsWith(`microsoft-${REPO}`));
-		if (extractedRoot) {
-			await fs.rename(
-				path.join(PUBLIC_DIR, extractedRoot),
-				DEST_DIR,
-			);
-			console.log('[winget] Done renaming the extracted folder to `' + DEST_DIR + '`')
-			console.timeEnd('[winget] Renaming took');
-		}
-		else {
-			console.error('[winget] could not find the extracted folder!');
-			await fs.unlink(tmpZip);
-			return;
-		}
-
-		try {
-			console.log('[winget] Deleting the zip folder...');
-			console.time('[winget] Deleting took');
-			await fs.unlink(tmpZip);
-		} catch (e: any) {
-			console.error('[winget] while deleting the zip folder! Error Message: ' + e?.message)
-			console.log('[winget] Done Deleting the zip folder');
-		}
-		console.timeEnd('[winget] Deleting took');
-		console.log('[winget] winget packages are ready at public/winget/winget-pkgs');
-
-
-	} catch (e: Error | any) {
-		console.error('[winget] something went wrong! Full error:', {
-			error: e,
-			message: e?.message,
-			stack: e?.stack,
-			url: URL,
-			destDir: DEST_DIR,
-			publicDir: PUBLIC_DIR
-		});
-	}
-
-
+	await downloadAndExtractGitHubRepo({
+		owner: OWNER,
+		repo: REPO,
+		branch: BRANCH,
+		privateDir: PRIVATE_DIR,
+		logPrefix: 'winget'
+	});
 }
 
 /**
@@ -207,8 +117,8 @@ async function loadWinGetApps(): Promise<WinGetApp[]> {
 				// console.log("[winget-loading] Skipping " + id + " : v" + version + ' (already have v' + current.version + ')');
 				continue;
 			}
-			if (!latest.has(id))
-				console.log("[winget-loading] Adding " + (latest.size + 1) + ' App: ' + (id) + ' : v' + version);
+			// if (!latest.has(id))
+			// 	console.log("[winget-loading] Adding " + (latest.size + 1) + ' App: ' + (id) + ' : v' + version);
 
 			const installers = Array.isArray(manifest.Installers) ? manifest.Installers : [];
 			const firstInst = installers[0] ?? {};

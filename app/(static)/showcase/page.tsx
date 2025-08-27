@@ -1,13 +1,14 @@
-import { Button } from '@/components/ui/button';
-import { 
-	Code, 
-	Palette, 
-	Gamepad2, 
-	Music, 
-	Video, 
-	FileText, 
-	Database, 
-	Shield, 
+import {Button} from '@/components/ui/button';
+import {getCachedWingetApps} from '@/lib/startup/cache-winget-apps';
+import {
+	Code,
+	Palette,
+	Gamepad2,
+	Music,
+	Video,
+	FileText,
+	Database,
+	Shield,
 	Zap,
 	Download,
 	Star,
@@ -18,14 +19,21 @@ import {
 	Filter
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import {FormatTotalApps} from '../../../components/shared/format-total-apps';
 
 export const metadata = {
 	title: 'App Gallery | Touchless Setup',
-	description: 'Explore our curated collection of 15,000+ applications. From development tools to creative software, find everything you need for your perfect PC setup.'
+	description:
+		'Explore our curated collection of 15,000+ applications. From development tools to creative software, find everything you need for your perfect PC setup.'
 };
 
-export default function ShowcasePage() {
+export default async function ShowcasePage() {
+	let totalApps: number | undefined = undefined;
+	try {
+		totalApps = (await getCachedWingetApps())?.length;
+	} catch (e) {
+		console.error(e);
+	}
 	const categories = [
 		{
 			name: 'Development',
@@ -33,7 +41,14 @@ export default function ShowcasePage() {
 			color: 'from-blue-500 to-indigo-600',
 			description: 'Essential tools for developers',
 			count: '2,500+',
-			popular: ['Visual Studio Code', 'Git', 'Node.js', 'Python', 'Docker', 'Postman'],
+			popular: [
+				'Visual Studio Code',
+				'Git',
+				'Node.js',
+				'Python',
+				'Docker',
+				'Postman'
+			],
 			bgPattern: 'bg-blue-50'
 		},
 		{
@@ -42,7 +57,14 @@ export default function ShowcasePage() {
 			color: 'from-purple-500 to-pink-600',
 			description: 'Design and multimedia tools',
 			count: '1,800+',
-			popular: ['Adobe Creative Suite', 'Figma', 'Blender', 'GIMP', 'OBS Studio', 'Audacity'],
+			popular: [
+				'Adobe Creative Suite',
+				'Figma',
+				'Blender',
+				'GIMP',
+				'OBS Studio',
+				'Audacity'
+			],
 			bgPattern: 'bg-purple-50'
 		},
 		{
@@ -51,7 +73,14 @@ export default function ShowcasePage() {
 			color: 'from-green-500 to-emerald-600',
 			description: 'Games and gaming platforms',
 			count: '3,200+',
-			popular: ['Steam', 'Epic Games', 'Discord', 'OBS Studio', 'Streamlabs', 'MSI Afterburner'],
+			popular: [
+				'Steam',
+				'Epic Games',
+				'Discord',
+				'OBS Studio',
+				'Streamlabs',
+				'MSI Afterburner'
+			],
 			bgPattern: 'bg-green-50'
 		},
 		{
@@ -60,7 +89,14 @@ export default function ShowcasePage() {
 			color: 'from-orange-500 to-red-600',
 			description: 'Office and productivity software',
 			count: '1,500+',
-			popular: ['Microsoft Office', 'Notion', 'Slack', 'Zoom', 'Teams', 'Todoist'],
+			popular: [
+				'Microsoft Office',
+				'Notion',
+				'Slack',
+				'Zoom',
+				'Teams',
+				'Todoist'
+			],
 			bgPattern: 'bg-orange-50'
 		},
 		{
@@ -69,7 +105,14 @@ export default function ShowcasePage() {
 			color: 'from-cyan-500 to-blue-600',
 			description: 'Video, audio, and streaming',
 			count: '900+',
-			popular: ['VLC', 'Spotify', 'Netflix', 'Plex', 'HandBrake', 'MediaInfo'],
+			popular: [
+				'VLC',
+				'Spotify',
+				'Netflix',
+				'Plex',
+				'HandBrake',
+				'MediaInfo'
+			],
 			bgPattern: 'bg-cyan-50'
 		},
 		{
@@ -78,7 +121,14 @@ export default function ShowcasePage() {
 			color: 'from-yellow-500 to-orange-600',
 			description: 'System tools and utilities',
 			count: '2,100+',
-			popular: ['7-Zip', 'CCleaner', 'Malwarebytes', 'TreeSize', 'PowerToys', 'WinRAR'],
+			popular: [
+				'7-Zip',
+				'CCleaner',
+				'Malwarebytes',
+				'TreeSize',
+				'PowerToys',
+				'WinRAR'
+			],
 			bgPattern: 'bg-yellow-50'
 		}
 	];
@@ -119,10 +169,14 @@ export default function ShowcasePage() {
 	];
 
 	const stats = [
-		{ label: 'Total Apps', value: '15,247', icon: Download },
-		{ label: 'Active Users', value: '50K+', icon: Users },
-		{ label: 'Installations', value: '2.3M', icon: Rocket },
-		{ label: 'Publishers', value: '3,800+', icon: Shield }
+		{
+			label: 'Total Apps',
+			value: FormatTotalApps(totalApps),
+			icon: Download
+		},
+		{label: 'Active Users', value: '50K+', icon: Users},
+		{label: 'Installations', value: '2.3M', icon: Rocket},
+		{label: 'Publishers', value: '3,800+', icon: Shield}
 	];
 
 	return (
@@ -137,17 +191,25 @@ export default function ShowcasePage() {
 						</span>
 					</h1>
 					<p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-						Discover our curated collection of 15,000+ applications. From essential productivity tools 
-						to entertainment software - find everything you need for your perfect PC setup.
+						Discover our curated collection of 15,000+ applications.
+						From essential productivity tools to entertainment
+						software - find everything you need for your perfect PC
+						setup.
 					</p>
 
 					{/* Stats */}
 					<div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
 						{stats.map((stat, index) => (
-							<div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+							<div
+								key={index}
+								className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
 								<stat.icon className="h-8 w-8 text-indigo-600 mx-auto mb-3" />
-								<div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-								<div className="text-sm text-gray-600">{stat.label}</div>
+								<div className="text-2xl font-bold text-gray-900">
+									{stat.value}
+								</div>
+								<div className="text-sm text-gray-600">
+									{stat.label}
+								</div>
 							</div>
 						))}
 					</div>
@@ -162,40 +224,59 @@ export default function ShowcasePage() {
 							Browse by Category
 						</h2>
 						<p className="text-xl text-gray-600 max-w-2xl mx-auto">
-							Whether you're setting up a new computer, recovering from a format, or just want to try new software, 
+							Whether you're setting up a new computer, recovering
+							from a format, or just want to try new software,
 							we've organized everything for easy discovery.
 						</p>
 					</div>
 
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{categories.map((category, index) => (
-							<div key={index} className={`group relative overflow-hidden rounded-3xl ${category.bgPattern} border border-gray-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2`}>
+							<div
+								key={index}
+								className={`group relative overflow-hidden rounded-3xl ${category.bgPattern} border border-gray-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2`}>
 								<div className="p-8">
 									{/* Icon and Header */}
 									<div className="flex items-center gap-4 mb-6">
-										<div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${category.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+										<div
+											className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${category.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
 											<category.icon className="h-8 w-8 text-white" />
 										</div>
 										<div>
-											<h3 className="text-2xl font-bold text-gray-900">{category.name}</h3>
-											<p className="text-gray-600">{category.count} apps</p>
+											<h3 className="text-2xl font-bold text-gray-900">
+												{category.name}
+											</h3>
+											<p className="text-gray-600">
+												{category.count} apps
+											</p>
 										</div>
 									</div>
 
-									<p className="text-gray-700 mb-6">{category.description}</p>
+									<p className="text-gray-700 mb-6">
+										{category.description}
+									</p>
 
 									{/* Popular Apps */}
 									<div className="space-y-2 mb-6">
-										<h4 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Popular Apps:</h4>
+										<h4 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">
+											Popular Apps:
+										</h4>
 										<div className="flex flex-wrap gap-2">
-											{category.popular.slice(0, 4).map((app, idx) => (
-												<span key={idx} className="bg-white/70 px-3 py-1 rounded-full text-sm text-gray-700 border">
-													{app}
-												</span>
-											))}
+											{category.popular
+												.slice(0, 4)
+												.map((app, idx) => (
+													<span
+														key={idx}
+														className="bg-white/70 px-3 py-1 rounded-full text-sm text-gray-700 border">
+														{app}
+													</span>
+												))}
 											{category.popular.length > 4 && (
 												<span className="bg-white/70 px-3 py-1 rounded-full text-sm text-gray-600 border">
-													+{category.popular.length - 4} more
+													+
+													{category.popular.length -
+														4}{' '}
+													more
 												</span>
 											)}
 										</div>
@@ -218,29 +299,40 @@ export default function ShowcasePage() {
 							Most Popular Apps
 						</h2>
 						<p className="text-xl text-gray-600 max-w-2xl mx-auto">
-							The apps everyone's downloading. Trusted by millions of users worldwide.
+							The apps everyone's downloading. Trusted by millions
+							of users worldwide.
 						</p>
 					</div>
 
 					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
 						{featuredApps.map((app, index) => (
-							<div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+							<div
+								key={index}
+								className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
 								<div className="flex items-center gap-4 mb-4">
 									<div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
 										<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg"></div>
 									</div>
 									<div>
-										<h3 className="font-bold text-gray-900">{app.name}</h3>
-										<p className="text-sm text-gray-500">{app.category}</p>
+										<h3 className="font-bold text-gray-900">
+											{app.name}
+										</h3>
+										<p className="text-sm text-gray-500">
+											{app.category}
+										</p>
 									</div>
 								</div>
-								
-								<p className="text-gray-600 text-sm mb-4">{app.description}</p>
-								
+
+								<p className="text-gray-600 text-sm mb-4">
+									{app.description}
+								</p>
+
 								<div className="flex items-center justify-between text-sm">
 									<div className="flex items-center gap-1">
 										<Star className="h-4 w-4 text-yellow-500 fill-current" />
-										<span className="text-gray-700">{app.rating}</span>
+										<span className="text-gray-700">
+											{app.rating}
+										</span>
 									</div>
 									<div className="flex items-center gap-1 text-gray-500">
 										<Download className="h-4 w-4" />
@@ -261,10 +353,11 @@ export default function ShowcasePage() {
 							Can't Find What You Need?
 						</h2>
 						<p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-							Use our powerful search and filtering system to discover the perfect apps for your workflow. 
-							With 15,000+ options, we've got something for everyone.
+							Use our powerful search and filtering system to
+							discover the perfect apps for your workflow. With
+							15,000+ options, we've got something for everyone.
 						</p>
-						
+
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 text-white">
 								<Search className="h-5 w-5" />
@@ -275,13 +368,12 @@ export default function ShowcasePage() {
 								<span>Smart Filters</span>
 							</div>
 						</div>
-						
+
 						<div className="mt-8">
 							<Link href="/#popular-apps">
-								<Button 
-									size="lg" 
-									className="bg-white text-indigo-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
-								>
+								<Button
+									size="lg"
+									className="bg-white text-indigo-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200">
 									<Rocket className="mr-3 h-6 w-6" />
 									Start Building Your Installer
 									<ArrowRight className="ml-3 h-6 w-6" />
