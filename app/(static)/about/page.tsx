@@ -1,11 +1,13 @@
-import { Button } from '@/components/ui/button';
-import { 
-	Heart, 
-	Coffee, 
-	Zap, 
-	Users, 
-	Shield, 
-	Code, 
+import {FormatTotalApps} from '@/components/shared/format-total-apps';
+import {Button} from '@/components/ui/button';
+import {getTotalWingetAppsCount} from '@/lib/startup/cache-winget-apps';
+import {
+	Heart,
+	Coffee,
+	Zap,
+	Users,
+	Shield,
+	Code,
 	Clock,
 	Rocket,
 	ArrowRight,
@@ -20,63 +22,82 @@ import Link from 'next/link';
 
 export const metadata = {
 	title: 'About | Touchless Setup',
-	description: 'Learn about TouchlessSetup - born from the frustration of setting up new PCs, built with love. Our mission to save everyone from the tedium of manual software installation.'
+	description:
+		'Learn about TouchlessSetup - born from the frustration of setting up new PCs, built with love. Our mission to save everyone from the tedium of manual software installation.'
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+	let totalApps: number | null = null;
+	try {
+		totalApps = await getTotalWingetAppsCount();
+	} catch (e) {
+		console.error(e);
+	}
 	const values = [
 		{
 			icon: Zap,
 			title: 'Efficiency First',
-			description: 'Every feature is designed to save you time. We believe life is too short for manual installations.'
+			description:
+				'Every feature is designed to save you time. We believe life is too short for manual installations.'
 		},
 		{
 			icon: Shield,
 			title: 'Security Always',
-			description: 'Built on Microsoft WinGet, ensuring all software comes from verified, trusted sources.'
+			description:
+				'Built on Microsoft WinGet, ensuring all software comes from verified, trusted sources.'
 		},
 		{
 			icon: Heart,
 			title: 'User Love',
-			description: 'Made for anyone who needs to set up a new PC or recover from a format.'
+			description:
+				'Made for anyone who needs to set up a new PC or recover from a format.'
 		},
 		{
 			icon: Users,
 			title: 'Community Driven',
-			description: 'Your feedback shapes our roadmap. We build what the community actually needs.'
+			description:
+				'Your feedback shapes our roadmap. We build what the community actually needs.'
 		}
 	];
 
 	const stats = [
-		{ label: 'Users Served', value: '50,000+', icon: Users },
-		{ label: 'Hours Saved', value: '100,000+', icon: Clock },
-		{ label: 'Apps Available', value: '15,247', icon: Code },
-		{ label: 'Countries Reached', value: '120+', icon: Award }
+		{label: 'Users Served', value: '50,000+', icon: Users},
+		{label: 'Hours Saved', value: '100,000+', icon: Clock},
+		{
+			label: 'Apps Available',
+			value: FormatTotalApps(totalApps),
+			icon: Code
+		},
+		{label: 'Countries Reached', value: '120+', icon: Award}
 	];
 
 	const milestones = [
 		{
 			date: '2024',
 			title: 'The Problem',
-			description: 'After helping friends and family set up their new computers for the 20th time, we realized there had to be a better way.',
+			description:
+				'After helping friends and family set up their new computers for the 20th time, we realized there had to be a better way.',
 			icon: Lightbulb
 		},
 		{
 			date: '2024',
 			title: 'First Solution',
-			description: 'Built the first version over a weekend. It was simple, but it worked and saved hours immediately.',
+			description:
+				'Built the first version over a weekend. It was simple, but it worked and saved hours immediately.',
 			icon: Code
 		},
 		{
 			date: '2024',
 			title: 'Going Public',
-			description: 'Shared with online communities. The response was amazing - clearly we weren\'t alone in this struggle.',
+			description:
+				"Shared with online communities. The response was amazing - clearly we weren't alone in this struggle.",
 			icon: Rocket
 		},
 		{
 			date: '2025',
 			title: 'Today',
-			description: 'Serving 50,000+ users worldwide, saving thousands of hours every month.',
+			description:
+				'Serving 50,000+ users worldwide, saving thousands of hours every month.',
 			icon: Target
 		}
 	];
@@ -95,21 +116,30 @@ export default function AboutPage() {
 								</span>
 							</h1>
 							<p className="mt-6 text-xl text-gray-600 leading-relaxed">
-								Born from the frustration of setting up new PCs, built with love. We're on a mission to save everyone 
-								from the tedium of manual software installation, one custom installer at a time.
+								Born from the frustration of setting up new PCs,
+								built with love. We're on a mission to save
+								everyone from the tedium of manual software
+								installation, one custom installer at a time.
 							</p>
 							<div className="mt-8 flex items-center gap-4 text-lg text-gray-700">
 								<Coffee className="h-6 w-6 text-amber-600" />
-								<span>Perfect for new PC setups, fresh installs, and computer enthusiasts</span>
+								<span>
+									Perfect for new PC setups, fresh installs,
+									and computer enthusiasts
+								</span>
 							</div>
 						</div>
-						
+
 						<div className="relative">
 							<div className="w-full h-80 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
 								<div className="text-center text-white">
 									<Rocket className="h-24 w-24 mx-auto mb-4" />
-									<h3 className="text-2xl font-bold">Making PC Setup</h3>
-									<h3 className="text-2xl font-bold">Ridiculously Simple</h3>
+									<h3 className="text-2xl font-bold">
+										Making PC Setup
+									</h3>
+									<h3 className="text-2xl font-bold">
+										Ridiculously Simple
+									</h3>
 								</div>
 							</div>
 						</div>
@@ -126,8 +156,12 @@ export default function AboutPage() {
 								<div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
 									<stat.icon className="h-8 w-8 text-white" />
 								</div>
-								<div className="text-3xl font-bold text-gray-900">{stat.value}</div>
-								<div className="text-gray-600">{stat.label}</div>
+								<div className="text-3xl font-bold text-gray-900">
+									{stat.value}
+								</div>
+								<div className="text-gray-600">
+									{stat.label}
+								</div>
 							</div>
 						))}
 					</div>
@@ -142,7 +176,8 @@ export default function AboutPage() {
 							Our Story
 						</h2>
 						<p className="text-xl text-gray-600">
-							Every great tool starts with a problem that needed solving.
+							Every great tool starts with a problem that needed
+							solving.
 						</p>
 					</div>
 
@@ -154,12 +189,16 @@ export default function AboutPage() {
 								</div>
 								<div className="flex-1">
 									<div className="flex items-center gap-4 mb-3">
-										<h3 className="text-xl font-bold text-gray-900">{milestone.title}</h3>
+										<h3 className="text-xl font-bold text-gray-900">
+											{milestone.title}
+										</h3>
 										<span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
 											{milestone.date}
 										</span>
 									</div>
-									<p className="text-gray-600 leading-relaxed">{milestone.description}</p>
+									<p className="text-gray-600 leading-relaxed">
+										{milestone.description}
+									</p>
 								</div>
 							</div>
 						))}
@@ -175,18 +214,25 @@ export default function AboutPage() {
 							What Drives Us
 						</h2>
 						<p className="text-xl text-gray-600 max-w-2xl mx-auto">
-							These aren't just words on a wall. They're the principles that guide every decision we make.
+							These aren't just words on a wall. They're the
+							principles that guide every decision we make.
 						</p>
 					</div>
 
 					<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 						{values.map((value, index) => (
-							<div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+							<div
+								key={index}
+								className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
 								<div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mb-6">
 									<value.icon className="h-6 w-6 text-white" />
 								</div>
-								<h3 className="text-xl font-bold text-gray-900 mb-4">{value.title}</h3>
-								<p className="text-gray-600 leading-relaxed">{value.description}</p>
+								<h3 className="text-xl font-bold text-gray-900 mb-4">
+									{value.title}
+								</h3>
+								<p className="text-gray-600 leading-relaxed">
+									{value.description}
+								</p>
 							</div>
 						))}
 					</div>
@@ -201,13 +247,16 @@ export default function AboutPage() {
 							Our Mission
 						</h2>
 						<p className="text-xl text-blue-100 leading-relaxed mb-8">
-							To eliminate the tedious, time-consuming process of manual software installation, 
-							giving everyone back their most precious resource: <strong className="text-white">time</strong>.
+							To eliminate the tedious, time-consuming process of
+							manual software installation, giving everyone back
+							their most precious resource:{' '}
+							<strong className="text-white">time</strong>.
 						</p>
 						<p className="text-lg text-blue-100 leading-relaxed">
-							We believe that setting up a new machine should take minutes, not hours. 
-							That choosing software should be fun, not frustrating. And that automation 
-							should be accessible to everyone, not just tech experts.
+							We believe that setting up a new machine should take
+							minutes, not hours. That choosing software should be
+							fun, not frustrating. And that automation should be
+							accessible to everyone, not just tech experts.
 						</p>
 					</div>
 				</div>
@@ -221,7 +270,8 @@ export default function AboutPage() {
 							Built on Solid Foundations
 						</h2>
 						<p className="text-xl text-gray-600">
-							We stand on the shoulders of giants to deliver reliability you can trust.
+							We stand on the shoulders of giants to deliver
+							reliability you can trust.
 						</p>
 					</div>
 
@@ -230,10 +280,14 @@ export default function AboutPage() {
 							<div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mb-6">
 								<Shield className="h-6 w-6 text-white" />
 							</div>
-							<h3 className="text-xl font-bold text-gray-900 mb-4">Microsoft WinGet</h3>
+							<h3 className="text-xl font-bold text-gray-900 mb-4">
+								Microsoft WinGet
+							</h3>
 							<p className="text-gray-600 leading-relaxed">
-								Every app comes from Microsoft's official package repository. No sketchy downloads, 
-								no modified installers, no bloatware. Just official software from verified publishers.
+								Every app comes from Microsoft's official
+								package repository. No sketchy downloads, no
+								modified installers, no bloatware. Just official
+								software from verified publishers.
 							</p>
 						</div>
 
@@ -241,10 +295,13 @@ export default function AboutPage() {
 							<div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mb-6">
 								<Code className="h-6 w-6 text-white" />
 							</div>
-							<h3 className="text-xl font-bold text-gray-900 mb-4">Modern Web Stack</h3>
+							<h3 className="text-xl font-bold text-gray-900 mb-4">
+								Modern Web Stack
+							</h3>
 							<p className="text-gray-600 leading-relaxed">
-								Built with C# (.NET Framework). Fast, secure, and maintainable. 
-								The same tool professionals use every day.
+								Built with C# (.NET Framework). Fast, secure,
+								and maintainable. The same tool professionals
+								use every day.
 							</p>
 						</div>
 					</div>
@@ -258,22 +315,25 @@ export default function AboutPage() {
 						Join Our Community
 					</h2>
 					<p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-						TouchlessSetup is more than just a tool - it's a community of people who believe 
-						in the power of automation. Here's how you can be part of it.
+						TouchlessSetup is more than just a tool - it's a
+						community of people who believe in the power of
+						automation. Here's how you can be part of it.
 					</p>
 
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="bg-gray-900 rounded-2xl p-8 text-white">
 							<Github className="h-12 w-12 mx-auto mb-6" />
-							<h3 className="text-xl font-bold mb-4">Contribute on GitHub</h3>
+							<h3 className="text-xl font-bold mb-4">
+								Contribute on GitHub
+							</h3>
 							<p className="text-gray-300 mb-6 leading-relaxed">
-								Help us improve the platform, suggest new features, or report bugs. 
-								Every contribution makes TouchlessSetup better for everyone.
+								Help us improve the platform, suggest new
+								features, or report bugs. Every contribution
+								makes TouchlessSetup better for everyone.
 							</p>
-							<Button 
-								variant="outline" 
-								className="border-white text-white hover:bg-white hover:text-gray-900"
-							>
+							<Button
+								variant="outline"
+								className="border-white text-white hover:bg-white hover:text-gray-900">
 								<Github className="mr-2 h-4 w-4" />
 								View on GitHub
 								<ExternalLink className="ml-2 h-4 w-4" />
@@ -282,15 +342,16 @@ export default function AboutPage() {
 
 						<div className="bg-blue-600 rounded-2xl p-8 text-white">
 							<Mail className="h-12 w-12 mx-auto mb-6" />
-							<h3 className="text-xl font-bold mb-4">Share Your Feedback</h3>
+							<h3 className="text-xl font-bold mb-4">
+								Share Your Feedback
+							</h3>
 							<p className="text-blue-100 mb-6 leading-relaxed">
-								Have an idea for a new feature? Found a bug? Just want to say hi? 
-								We'd love to hear from you.
+								Have an idea for a new feature? Found a bug?
+								Just want to say hi? We'd love to hear from you.
 							</p>
-							<Button 
-								variant="outline" 
-								className="border-white text-white hover:bg-white hover:text-blue-600"
-							>
+							<Button
+								variant="outline"
+								className="border-white text-white hover:bg-white hover:text-blue-600">
 								<Mail className="mr-2 h-4 w-4" />
 								Get in Touch
 								<ExternalLink className="ml-2 h-4 w-4" />
@@ -307,13 +368,13 @@ export default function AboutPage() {
 						Ready to Save Hours of Your Life?
 					</h2>
 					<p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-						Join thousands of people who've already discovered the joy of automated PC setup.
+						Join thousands of people who've already discovered the
+						joy of automated PC setup.
 					</p>
 					<Link href="/#popular-apps">
-						<Button 
-							size="lg" 
-							className="bg-white text-indigo-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
-						>
+						<Button
+							size="lg"
+							className="bg-white text-indigo-600 hover:bg-gray-50 px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200">
 							<Rocket className="mr-3 h-6 w-6" />
 							Try TouchlessSetup Now
 							<ArrowRight className="ml-3 h-6 w-6" />

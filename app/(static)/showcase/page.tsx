@@ -1,5 +1,7 @@
 import {Button} from '@/components/ui/button';
-import {getCachedWingetApps} from '@/lib/startup/cache-winget-apps';
+import {
+	getTotalWingetAppsCount
+} from '@/lib/startup/cache-winget-apps';
 import {
 	Code,
 	Palette,
@@ -23,14 +25,13 @@ import {FormatTotalApps} from '../../../components/shared/format-total-apps';
 
 export const metadata = {
 	title: 'App Gallery | Touchless Setup',
-	description:
-		'Explore our curated collection of 15,000+ applications. From development tools to creative software, find everything you need for your perfect PC setup.'
+	description: `Explore our curated collection of ${FormatTotalApps(null)} applications. From development tools to creative software, find everything you need for your perfect PC setup.`
 };
 
 export default async function ShowcasePage() {
-	let totalApps: number | undefined = undefined;
+	let totalApps: number | null = null;
 	try {
-		totalApps = (await getCachedWingetApps())?.length;
+		totalApps = await getTotalWingetAppsCount();
 	} catch (e) {
 		console.error(e);
 	}
@@ -191,7 +192,7 @@ export default async function ShowcasePage() {
 						</span>
 					</h1>
 					<p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-						Discover our curated collection of 15,000+ applications.
+						Discover our curated collection of {FormatTotalApps(totalApps)} applications.
 						From essential productivity tools to entertainment
 						software - find everything you need for your perfect PC
 						setup.
@@ -355,7 +356,7 @@ export default async function ShowcasePage() {
 						<p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
 							Use our powerful search and filtering system to
 							discover the perfect apps for your workflow. With
-							15,000+ options, we've got something for everyone.
+							{FormatTotalApps(totalApps)} options, we've got something for everyone.
 						</p>
 
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -10,7 +10,7 @@ import {
 	Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import {getCachedWingetApps} from '@/lib/startup/cache-winget-apps';
+import {getTotalWingetAppsCount} from '@/lib/startup/cache-winget-apps';
 import {FormatTotalApps} from '../../../components/shared/format-total-apps';
 
 export const metadata = {
@@ -20,9 +20,9 @@ export const metadata = {
 };
 
 export default async function HowItWorksPage() {
-	let totalApps: number | undefined = undefined;
+	let totalApps: number | null = null;
 	try {
-		totalApps = (await getCachedWingetApps())?.length;
+		totalApps = await getTotalWingetAppsCount();
 	} catch (e) {
 		console.error(e);
 	}

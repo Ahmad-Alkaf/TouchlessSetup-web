@@ -145,6 +145,10 @@ async function cleanupLockFiles(): Promise<void> {
 	}
 }
 
+export async function getTotalWingetAppsCount(): Promise<number | null> {
+	return (await getCachedWingetApps())?.length ?? null;
+}
+
 /**
  * Get the cached WinGet apps or wait for them to load if currently loading
  */
