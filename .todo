@@ -5,9 +5,10 @@ Publish on 2025-06-30 plan:
 05: Add winget apps with searchbar.
 08: Finish Download button with all selected apps.
 10: Beautify.
+----------------------- WE ARE HERE -----------------------
 - 06-20: Using Ubentu/Debian VMware try compile .NET by each POST request.
 - 06-30: Deploy to Digital Ocean.
-
+- 09-15: Add support page (Support me/us) after successfully generating the installer.
 
 V2
 - Add Custom Windows Settings (Using PowerShell Scripts).

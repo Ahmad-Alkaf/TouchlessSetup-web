@@ -98,3 +98,13 @@ export interface WinGetApp {
   /** External popularity metric (e.g. GitHub release downloads). */
   // downloadCount?: number;
 }
+
+export interface TSAction {
+  title: string,
+  runner: "group" | "winget",
+  errorAction: "Continue" | "Stop",
+  executeChildrenInParallel: boolean,
+  hidden: boolean,
+  arguments: string[],
+  scripts: TSAction[],
+}

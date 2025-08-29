@@ -104,13 +104,13 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 							<SelectItem value="nameDescending">
 								Name (Descending)
 							</SelectItem> */}
-							{/* <SelectItem value="releaseDateNewest">
+					{/* <SelectItem value="releaseDateNewest">
 								Release Date (Newest First)
 							</SelectItem>
 							<SelectItem value="releaseDateOldest">
 								Release Date (Oldest First)
 							</SelectItem> */}
-						{/* </SelectContent>
+					{/* </SelectContent>
 					</Select> */}
 					{/* <Tooltip>
 						<TooltipTrigger asChild>
@@ -201,7 +201,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 						</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<GenerateInstallerBtn hideCheck={true} />
+						<GenerateInstallerBtn />
 					</div>
 				</div>
 			</div>

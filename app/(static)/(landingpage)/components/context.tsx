@@ -12,7 +12,12 @@ import loadWingetApps, {
 	type LoadWingetAppsRet,
 	type SortOption
 } from '@/actions/load-winget-apps';
+import {
+	generateInstaller,
+	type GenerateInstallerResult
+} from '@/actions/generate-installer';
 import {CATEGORIES} from './popular-apps/components/CATEGORIES';
+import LoadingModal from '@/components/ui/loading-modal';
 
 type SelectedAppsContextType = {
 	selectedApps: WinGetApp[];
@@ -20,7 +25,9 @@ type SelectedAppsContextType = {
 	toggleAppSelection: (app: WinGetApp) => void;
 	clearAllSelection: () => void;
 	isSelected: (app: WinGetApp) => boolean;
-	installSelected: () => void;
+	installSelected: () => Promise<void>;
+	isGenerating: boolean;
+	generationProgress: number;
 	/**
 	 * Apps that are filtered and sorted and limited by pagination.
 	 */
@@ -64,6 +71,8 @@ export function Context({children}: {children: React.ReactNode}) {
 	const [searchTerm, setSearchTerm] = useState<string>('');
 	const [sortBy, setSortBy] = useState<SortOption>('popular');
 	const [isLoading, setIsLoading] = useState(true);
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [generationProgress, setGenerationProgress] = useState<number>(0);
 	const clearAllSelection = () => setSelectedApps([]);
 
 	// Memoized callback to check selection status to avoid new function reference on each render
@@ -81,18 +90,70 @@ export function Context({children}: {children: React.ReactNode}) {
 		});
 	}, []);
 
-	const installSelected = () => {
-		if (typeof window !== 'undefined') {
-			const message =
-				`The installation feature is NOT IMPLEMENTED yet.\n\n` +
-				(selectedApps.length > 0
-					? `You have selected ${selectedApps.length} app${
-							selectedApps.length > 1 ? 's' : ''
-					  }:\n` +
-					  selectedApps.map(app => `• ${app.name}`).join('\n')
-					: 'No applications selected.');
-			alert(message);
-		} else alert('NOT IMPLEMENTED');
+	const installSelected = async () => {
+		if (selectedApps.length === 0) {
+			alert('No applications selected for installation.');
+			return;
+		}
+
+		setIsGenerating(true);
+		setGenerationProgress(0);
+
+		try {
+			// Simulate progress updates
+			const progressInterval = setInterval(() => {
+				setGenerationProgress(prev => {
+					if (prev >= 90) {
+						clearInterval(progressInterval);
+						return 90; // Keep at 90% until actual completion
+					}
+					const next = prev + Math.random() * (11 - prev / 10); // Random increments for realism
+					if (prev > next) return prev;
+					return next;
+				});
+			}, 600);
+
+			const result: GenerateInstallerResult = await generateInstaller(
+				selectedApps
+			);
+
+			// Clear the interval and set to 100% on completion
+			clearInterval(progressInterval);
+			setGenerationProgress(100);
+
+			// Brief delay to show 100% completion
+			await new Promise(resolve => setTimeout(resolve, 500));
+
+			if (result.success && result.downloadUrl && result.fileName) {
+				// Create a temporary download link
+				const link = document.createElement('a');
+				link.href = result.downloadUrl;
+				link.download = result.fileName;
+				link.style.display = 'none';
+
+				// Append to body, click, and remove
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+
+				// Optionally clear selection after successful download
+				clearAllSelection();
+			} else {
+				alert(
+					`Failed to generate installer: ${
+						result.error || 'Unknown error'
+					}`
+				);
+			}
+		} catch (error) {
+			console.error('Error during installation:', error);
+			alert(
+				'An unexpected error occurred while generating the installer. Please try again.'
+			);
+		} finally {
+			setIsGenerating(false);
+			setGenerationProgress(0);
+		}
 	};
 
 	useEffect(() => {
@@ -119,28 +180,42 @@ export function Context({children}: {children: React.ReactNode}) {
 	}, [take, skip, searchTerm]);
 
 	return (
-		<SelectedAppsContext.Provider
-			value={{
-				selectedApps,
-				setSelectedApps,
-				toggleAppSelection,
-				clearAllSelection,
-				isSelected,
-				apps: apps,
-				installSelected,
-				skip,
-				setSkip,
-				take,
-				setTake,
-				searchTerm,
-				setSearchTerm,
-				sortBy,
-				setSortBy,
-				isLoading,
-				totalFilteredApps,
-				totalApps
-			}}>
-			{children}
-		</SelectedAppsContext.Provider>
+		<>
+			<SelectedAppsContext.Provider
+				value={{
+					selectedApps,
+					setSelectedApps,
+					toggleAppSelection,
+					clearAllSelection,
+					isSelected,
+					apps: apps,
+					installSelected,
+					isGenerating,
+					generationProgress,
+					skip,
+					setSkip,
+					take,
+					setTake,
+					searchTerm,
+					setSearchTerm,
+					sortBy,
+					setSortBy,
+					isLoading,
+					totalFilteredApps,
+					totalApps
+				}}>
+				{children}
+			</SelectedAppsContext.Provider>
+
+			{/* Global Loading Modal */}
+			<LoadingModal
+				isOpen={isGenerating}
+				title="Generating Installer"
+				description={`Creating your custom installer with ${
+					selectedApps.length
+				} selected app${selectedApps.length === 1 ? '' : 's'}...`}
+				progress={generationProgress}
+			/>
+		</>
 	);
 }
