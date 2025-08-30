@@ -85,7 +85,7 @@ export default function WingetApps({apps}: {apps: WinGetApp[]}) {
 					<div className="md:flex-1 w-full relative">
 						<Search className="absolute pointer-events-none left-3 top-3 h-4 w-4 text-muted-foreground" />
 						<Input
-							placeholder="Search for app, publisher, tag, or description..."
+							placeholder="Search for app name, publisher, tag, or description"
 							value={search}
 							onChange={e => setSearch(e.target.value)}
 							className="pl-10"

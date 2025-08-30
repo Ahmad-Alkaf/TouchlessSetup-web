@@ -12,10 +12,6 @@ import loadWingetApps, {
 	type LoadWingetAppsRet,
 	type SortOption
 } from '@/actions/load-winget-apps';
-import {
-	generateInstaller,
-	type GenerateInstallerResult
-} from '@/actions/generate-installer';
 import {CATEGORIES} from './popular-apps/components/CATEGORIES';
 import LoadingModal from '@/components/ui/loading-modal';
 
@@ -113,32 +109,76 @@ export function Context({children}: {children: React.ReactNode}) {
 				});
 			}, 600);
 
-			const result: GenerateInstallerResult = await generateInstaller(
-				selectedApps
-			);
+			// Send POST request to API route
+			const response = await fetch('/api/generate-installer', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					selectedApps: selectedApps.map(app => ({
+						id: app.id,
+						name: app.name
+					}))
+				})
+			});
 
 			// Clear the interval and set to 100% on completion
 			clearInterval(progressInterval);
 			setGenerationProgress(100);
 
+			if (!response.ok) {
+				// Handle error response
+				const errorData = await response
+					.json()
+					.catch(() => ({
+						error: 'Failed to generate installer: Unknown error'
+					}));
+				alert(
+					errorData.error ??
+						'Failed to generate installer: Unknown error'
+				);
+				return;
+			}
+
 			// Brief delay to show 100% completion
 			await new Promise(resolve => setTimeout(resolve, 500));
 
-			if (result.success && result.downloadUrl && result.fileName) {
-				// Create a temporary download link
+			// Check if response is a file download
+			const contentDisposition = response.headers.get(
+				'Content-Disposition'
+			);
+			if (
+				contentDisposition &&
+				contentDisposition.includes('attachment')
+			) {
+				// Handle file download
+				const blob = await response.blob();
+				const filename =
+					contentDisposition
+						.split('filename=')[1]
+						?.replace(/["']/g, '') || 'installer.exe';
+
+				// Create download link
+				const url = window.URL.createObjectURL(blob);
 				const link = document.createElement('a');
-				link.href = result.downloadUrl;
-				link.download = result.fileName;
+				link.href = url;
+				link.download = filename;
 				link.style.display = 'none';
 
-				// Append to body, click, and remove
+				// Trigger download
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
 
-				// Optionally clear selection after successful download
+				// Clean up the blob URL
+				window.URL.revokeObjectURL(url);
+
+				// Clear selection after successful download
 				clearAllSelection();
 			} else {
+				// Handle JSON response (error case)
+				const result = await response.json();
 				alert(
 					`Failed to generate installer: ${
 						result.error || 'Unknown error'

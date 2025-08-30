@@ -26,4 +26,11 @@ export async function initializeWinformsRepo(): Promise<void> {
 		logPrefix: 'download-winforms-repo',
 		token: githubToken
 	});
+	await downloadAndExtractGitHubRepo({
+		owner: 'Ahmad-Alkaf',
+		repo: 'FileUtility',
+		branch: 'master',
+		privateDir: path.join(process.cwd(), 'private', 'winforms'),
+		logPrefix: 'download-FileUtility-repo',
+	});
 }
