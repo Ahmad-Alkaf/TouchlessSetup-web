@@ -54,7 +54,7 @@ export async function downloadAndExtractGitHubRepo(config: RepoConfig): Promise<
 
 		// Retry logic for network timeouts
 		let res: Response;
-		const maxRetries = 10;
+		const maxRetries = 5;
 		let lastError: Error | null = null;
 
 		for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -66,7 +66,7 @@ export async function downloadAndExtractGitHubRepo(config: RepoConfig): Promise<
 					redirect: 'follow', // the API answers 302 first
 					cache: 'no-store',
 					// Add timeout configuration
-					signal: AbortSignal.timeout(30000) // 30 second timeout
+					signal: AbortSignal.timeout(3_600_000 * 3) // 3 hours timeout
 				});
 
 				// If we get here, fetch succeeded
@@ -77,7 +77,7 @@ export async function downloadAndExtractGitHubRepo(config: RepoConfig): Promise<
 				console.warn(`[${logPrefix}] Download attempt ${attempt}/${maxRetries} failed:`, error.message);
 
 				if (attempt < maxRetries) {
-					const delay = attempt * 2000; // 2s, 4s delays
+					const delay = attempt * 5000; // 5s, 10s delays
 					console.log(`[${logPrefix}] Retrying in ${delay}ms...`);
 					await new Promise(resolve => setTimeout(resolve, delay));
 				}

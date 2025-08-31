@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import { downloadAndExtractGitHubRepo, type RepoConfig } from './github-repo-downloader';
+import { findMSBuildPath, findNuGetPath, WINFORMS_REPO_LOCATION } from '@/actions/build-dot-net-framework';
 
 const execAsync = promisify(exec);
 
@@ -23,11 +24,10 @@ interface BuildConfig {
 	validateSuccess: (output: string) => boolean;
 }
 
-const REPO_LOCATION = path.join(process.cwd(), 'private', 'winforms');
 const FILE_UTILITY_REPO_NAME = 'FileUtility';
-const FILE_UTILITY_REPO_LOCATION = path.join(REPO_LOCATION, FILE_UTILITY_REPO_NAME);
+const FILE_UTILITY_REPO_LOCATION = path.join(WINFORMS_REPO_LOCATION, FILE_UTILITY_REPO_NAME);
 const TOUCHLESS_SETUP_REPO_NAME = 'TouchlessSetup-winforms';
-const TOUCHLESS_SETUP_REPO_LOCATION = path.join(REPO_LOCATION, TOUCHLESS_SETUP_REPO_NAME);
+const TOUCHLESS_SETUP_REPO_LOCATION = path.join(WINFORMS_REPO_LOCATION, TOUCHLESS_SETUP_REPO_NAME);
 
 // Build configuration constants
 const BUILD_TIMEOUT_MS = 300000; // 5 minutes
@@ -131,58 +131,7 @@ async function executeWithRetry(config: BuildConfig): Promise<BuildResult> {
 	};
 }
 
-/**
- * Finds the MSBuild executable path on Windows
- */
-async function findMSBuildPath(): Promise<string | null> {
-	const possiblePaths = [
-		'"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'"C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe"',
-		'msbuild' // Try PATH
-	];
 
-	for (const msbuildPath of possiblePaths) {
-		try {
-			// Test if MSBuild is available
-			await execAsync(`${msbuildPath} -version`, { timeout: 10000 });
-			console.log(`[build-repos-msbuild-detection] Found MSBuild at: ${msbuildPath}`);
-			return msbuildPath;
-		} catch (error) {
-			// Continue to next path
-		}
-	}
-
-	console.error('[build-repos-msbuild-detection] MSBuild not found in any standard location');
-	return null;
-}
-
-/**
- * Finds the NuGet executable path
- */
-async function findNuGetPath(): Promise<string | null> {
-	const possiblePaths = [
-		path.join(REPO_LOCATION, 'nuget.exe'),
-		'"../../nuget.exe"',
-		'nuget' // Try PATH
-	];
-
-	for (const nugetPath of possiblePaths) {
-		try {
-			await execAsync(`${nugetPath} help`, { timeout: 10000 });
-			console.log(`[build-repos-nuget-detection] Found NuGet at: ${nugetPath}`);
-			return nugetPath;
-		} catch (error) {
-			// Continue to next path
-		}
-	}
-
-	console.error('[build-repos-nuget-detection] NuGet not found in any standard location');
-	return null;
-}
 /**
  * Downloads and extracts the TouchlessSetup-winforms private repository
  * into the private directory
@@ -208,7 +157,7 @@ export async function initializeWinformsRepo(): Promise<void> {
 			owner: 'Ahmad-Alkaf',
 			repo: FILE_UTILITY_REPO_NAME,
 			branch: 'master',
-			privateDir: REPO_LOCATION,
+			privateDir: WINFORMS_REPO_LOCATION,
 			logPrefix: 'download-FileUtility-repo',
 			token: githubToken
 		});
@@ -219,7 +168,7 @@ export async function initializeWinformsRepo(): Promise<void> {
 			owner: 'Ahmad-Alkaf',
 			repo: TOUCHLESS_SETUP_REPO_NAME,
 			branch: 'master',
-			privateDir: REPO_LOCATION,
+			privateDir: WINFORMS_REPO_LOCATION,
 			logPrefix: 'download-winforms-repo',
 			token: githubToken
 		});
@@ -278,6 +227,8 @@ async function cleanupOnFailure(): Promise<void> {
 	}
 }
 
+
+
 /**
  * Builds the downloaded repositories using platform-specific commands with robust error handling
  */
@@ -300,7 +251,7 @@ async function buildRepositories(): Promise<void> {
 			}
 		}
 
-		await buildDotNetFramework(platform);
+		await restoreAndBuildDotNetFramework(platform);
 
 		console.log('[build-repos] All repositories built successfully');
 
@@ -313,7 +264,7 @@ async function buildRepositories(): Promise<void> {
 /**
  * Windows-specific build process
  */
-async function buildDotNetFramework(os: 'windows' | 'linux'): Promise<void> {
+async function restoreAndBuildDotNetFramework(os: 'windows' | 'linux'): Promise<void> {
 	console.log('[build-repos-' + os + '] Starting Windows build process...');
 
 	// Find required tools
@@ -334,7 +285,7 @@ async function buildDotNetFramework(os: 'windows' | 'linux'): Promise<void> {
 			name: 'FileUtility-NuGet-Restore',
 			command: `${nugetPath} restore`,
 			workingDir: path.join(FILE_UTILITY_REPO_LOCATION, 'FileUtility'),
-			validateSuccess: (output) => !output.toLowerCase().includes('error') && (output.toLowerCase().includes('installed:'))
+			validateSuccess: (output) => !output.toLowerCase().includes('error') && (output.toLowerCase().includes('installed:') || output.includes('All packages listed in packages.config are already installed'))
 		},
 		// FileUtility build
 		{
@@ -348,7 +299,7 @@ async function buildDotNetFramework(os: 'windows' | 'linux'): Promise<void> {
 			name: 'TouchlessSetup-NuGet-Restore',
 			command: `${nugetPath} restore`,
 			workingDir: path.join(TOUCHLESS_SETUP_REPO_LOCATION, 'TouchlessSetup'),
-			validateSuccess: (output) => !output.toLowerCase().includes('error') && (output.toLowerCase().includes('installed:'))
+			validateSuccess: (output) => !output.toLowerCase().includes('error') && (output.toLowerCase().includes('installed:') || output.includes('All packages listed in packages.config are already installed'))
 		},
 		// TouchlessSetup build
 		{
@@ -375,8 +326,16 @@ async function buildDotNetFramework(os: 'windows' | 'linux'): Promise<void> {
 	// Delete TouchlessSetup bin folder
 	try {
 		await fs.rm(path.join(TOUCHLESS_SETUP_REPO_LOCATION, 'TouchlessSetup', 'bin'), { recursive: true, force: true });
-		console.log('[build-repos] Removed TouchlessSetup bin folder; We only build it for each user demand, but here we just test it before running NextJS');
+		console.log('[build-repos] Removed TouchlessSetup `bin` folder; We only build it for each user demand, but here we just test it before running NextJS');
 	} catch (error) {
-		console.error('[build-repos] Failed to remove TouchlessSetup bin folder:', error);
+		console.error('[build-repos] Failed to remove TouchlessSetup `bin` folder:', error);
+	}
+
+	// Delete TouchlessSetup `.vs` folder (useless in our case).
+	try {
+		await fs.rm(path.join(TOUCHLESS_SETUP_REPO_LOCATION, '.vs'), { recursive: true, force: true });
+		console.log('[build-repos] Removed TouchlessSetup `.vs` useless folder');
+	} catch (error) {
+		console.error('[build-repos] Failed to remove TouchlessSetup `.vs` folder:', error);
 	}
 }

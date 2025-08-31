@@ -17,25 +17,31 @@ export async function register() {
         // Use atomic operation to ensure single initialization
         atomicOperation('server-initialization', async () => {
             console.log('[instrumentation] Starting initialization tasks...');
-            
+            console.time('[instrumentation] initialization took');
+
             // Start cache initialization immediately in the background
             // Don't await to avoid blocking server startup
             initializeWingetAppsCache()
                 .then(() => {
-                    console.log('[instrumentation] WinGet cache initialization completed successfully');
+                    console.log('[instrumentation] WinGet cache initialization completed');
+                    console.log('[instrumentation] Sleeping before initialization of WinForms repository...');
+                    setTimeout(() => {
+
+                        // Start winform repository download in the background
+                        initializeWinformsRepo()
+                            .then(() => {
+                                console.log('[instrumentation] WinForm repository initialization completed');
+                                console.timeEnd('[instrumentation] initialization took');
+                            })
+                            .catch((error) => {
+                                console.error('[instrumentation] WinForm repository initialization failed:', error);
+                            });
+                    }, 11_000);
                 })
                 .catch((error) => {
                     console.error('[instrumentation] WinGet cache initialization failed:', error);
                 });
 
-            // Start winform repository download in the background
-            initializeWinformsRepo()
-                .then(() => {
-                    console.log('[instrumentation] WinForm repository initialization completed successfully');
-                })
-                .catch((error) => {
-                    console.error('[instrumentation] WinForm repository initialization failed:', error);
-                });
 
             console.log('[instrumentation] Server initialization tasks started in background');
         }).catch((error) => {
