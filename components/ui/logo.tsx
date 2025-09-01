@@ -1,12 +1,16 @@
 import {cn} from '@/lib/utils';
+import Image from 'next/image';
 
 export function LogoTextRight({className}: {className?: string}) {
 	return (
 		<div className={cn('flex items-center gap-3', className)}>
-			<img
+			<Image
 				src="/logo/logo.svg"
-				className="h-12 transition-transform duration-300 hover:scale-105"
+				width={48}
+				height={48}
+				className="transition-transform duration-300 hover:scale-105"
 				alt="TouchlessSetup Logo"
+				priority
 			/>
 			<div className="flex flex-col">
 				<span className="text-xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
@@ -22,10 +26,13 @@ export function LogoTextRight({className}: {className?: string}) {
 export function LogoTextBottom({className}: {className?: string}) {
 	return (
 		<div className={cn('flex flex-col items-center gap-2', className)}>
-			<img
+			<Image
 				src="/logo/logo.svg"
-				className="h-16 transition-transform duration-300 hover:scale-105"
+				width={64}
+				height={64}
+				className="transition-transform duration-300 hover:scale-105"
 				alt="TouchlessSetup Logo"
+				priority
 			/>
 			<div className="flex flex-col items-center">
 				<span className="text-xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
@@ -39,16 +46,19 @@ export function LogoTextBottom({className}: {className?: string}) {
 	);
 }
 
-export function LogoWithoutText({className}: {className?: string}) {
+export function LogoWithoutText({className, size = 48}: {className?: string; size?: number}) {
 	return (
 		<div className={cn('relative inline-block', className)}>
-			<img
+			<Image
 				src="/logo/logo.svg"
+				width={size}
+				height={size}
 				className={cn(
-					'h-12 transition-all duration-300 hover:scale-105 drop-shadow-lg',
+					'transition-all duration-300 hover:scale-105 drop-shadow-lg',
 					className
 				)}
 				alt="TouchlessSetup Logo"
+				priority
 			/>
 		</div>
 	);

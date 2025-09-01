@@ -63,7 +63,7 @@ async function addDirectoryToZip(zipFile: yazl.ZipFile, dirPath: string, zipPath
 
 export async function POST(request: NextRequest) {
 	const { selectedApps } = await request.json();
-
+	
 	// Validate input
 	if (!selectedApps || !Array.isArray(selectedApps) || selectedApps.length === 0) {
 		return new Response(JSON.stringify({
@@ -75,83 +75,31 @@ export async function POST(request: NextRequest) {
 		});
 	}
 
-	const mainAction: TSAction = generateMainActionContent(selectedApps);
 	const tempId = generateTempId();
 	try {
+		// Generate the installer and get the zip file path
+		const zipPath = await generateInstallerZipFile(selectedApps, tempId);
 
-		const originalWinformsDir = path.join(WINFORMS_REPO_LOCATION, 'TouchlessSetup-winforms');
-		const tempWinformsDir = path.join(WINFORMS_REPO_LOCATION, `TouchlessSetup-winforms-${tempId}`);
+		// Get file stats for proper headers
+		const stats = await fs.stat(zipPath);
+		
+		// Read the file and return as a direct response
+		const fileBuffer = await fs.readFile(zipPath);
+		
+		// Clean up the temporary file
+		fs.unlink(zipPath).catch(error => {
+			console.warn(`[generate-installer-${tempId}] Failed to cleanup zip file:`, error);
+		});
 
-		try {
-			// Copy private/winforms/TouchlessSetup-winforms to private/winforms/TouchlessSetup-winforms-{temp UUID}
-			console.log(`[generate-installer-${tempId}] Copying winforms directory to temporary location: ${tempWinformsDir}`);
-			await copyDirectory(originalWinformsDir, tempWinformsDir);
-
-			// Write the main-action.json file with `mainAction` inside the temporary directory
-			const mainActionPath = path.join(tempWinformsDir, 'TouchlessSetup', 'main-action.json');
-			try {
-				await fs.writeFile(mainActionPath, JSON.stringify(mainAction, null, 2), 'utf8');
-				console.log(`[generate-installer-${tempId}] User's mainActions are written to main-action.json`);
-			} catch (error) {
-				console.error(`[generate-installer-${tempId}] Failed to write main-action.json of id ${tempId}`, error);
-				throw 'Error Code: 9155832';
+		// Return the file directly
+		return new Response(new Uint8Array(fileBuffer), {
+			headers: {
+				'Content-Disposition': `attachment; filename="${generateFilename(selectedApps)}.zip"`,
+				'Content-Type': 'application/zip',
+				'Content-Length': stats.size.toString(),
+				'Cache-Control': 'no-cache',
 			}
-
-			// Call optimizedBuildTouchlessWinforms with the new directory
-			console.log(`[generate-installer-${tempId}] Building...`);
-			await optimizedBuildTouchlessWinforms(tempWinformsDir);
-
-			// Read the Release directory content (bin/Release)
-			const releasePath = path.join(tempWinformsDir, 'TouchlessSetup', 'bin', 'Release');
-
-			// Create a temporary zip file
-			const zipFileName = `TouchlessSetup-Release-${tempId}.zip`;
-			const zipPath = path.join(tmpdir(), zipFileName);
-
-			try {
-				console.log(`[generate-installer-${tempId}] Creating zip file from Release directory...`);
-				await createOptimizedZipFromDirectory(releasePath, zipPath);
-
-				// Read the zip file and stream it back
-				const zipBuffer = await fs.readFile(zipPath);
-				console.log(`[generate-installer-${tempId}] Created zip file: ${zipPath} (${zipBuffer.length} bytes)`);
-
-				// Return the zip file as a Response with proper filename
-				const zipFilename = generateFilename(selectedApps) + '.zip';
-
-				// Create a streaming response that deletes the zip after streaming
-				return new Response(new Uint8Array(zipBuffer), {
-					headers: {
-						'Content-Disposition': `attachment; filename="${zipFilename}"`,
-						'Content-Type': 'application/zip',
-					}
-				});
-
-			} catch (readError) {
-				console.error(`[generate-installer-${tempId}] Failed to create or read zip file:`, readError);
-				throw 'Error Code: 9174885';
-			} finally {
-				// Clean up the temporary zip file
-				try {
-					await fs.unlink(zipPath);
-					console.log(`[generate-installer-${tempId}] Cleaned up temporary zip file: ${zipPath}`);
-				} catch (cleanupZipError) {
-					console.warn(`[generate-installer-${tempId}] Failed to cleanup zip file:`, cleanupZipError);
-				}
-			}
-
-		} finally {
-			// Cleanup: Delete the temporary directory
-			try {
-				console.log(`[generate-installer-${tempId}] Cleaning up temporary directory: ${tempWinformsDir}`);
-				await fs.rm(tempWinformsDir, { recursive: true, force: true });
-				console.log(`[generate-installer-${tempId}] Cleanup completed`);
-			} catch (cleanupError) {
-				console.error(`[generate-installer-${tempId}] Failed to cleanup temporary directory:`, cleanupError);
-				// Don't throw here as the main operation was successful
-			}
-		}
-
+		});
 	} catch (error) {
 		console.error(`[generate-installer-${tempId}] Error generating installer:`, { error, selectedApps });
 		return new Response(JSON.stringify({
@@ -161,5 +109,60 @@ export async function POST(request: NextRequest) {
 			status: 500,
 			headers: { 'Content-Type': 'application/json' }
 		});
+	}
+}
+
+
+export async function generateInstallerZipFile(selectedApps: { id: string; name: string }[], tempId: string): Promise<string> {
+
+	const mainAction: TSAction = generateMainActionContent(selectedApps);
+	const originalWinformsDir = path.join(WINFORMS_REPO_LOCATION, 'TouchlessSetup-winforms');
+	const tempWinformsDir = path.join(WINFORMS_REPO_LOCATION, `TouchlessSetup-winforms-${tempId}`);
+
+	try {
+		// Copy private/winforms/TouchlessSetup-winforms to private/winforms/TouchlessSetup-winforms-{temp UUID}
+		console.log(`[generate-installer-${tempId}] Copying winforms directory to temporary location: ${tempWinformsDir}`);
+		await copyDirectory(originalWinformsDir, tempWinformsDir);
+
+		// Write the main-action.json file with `mainAction` inside the temporary directory
+		const mainActionPath = path.join(tempWinformsDir, 'TouchlessSetup', 'main-action.json');
+		try {
+			await fs.writeFile(mainActionPath, JSON.stringify(mainAction, null, 2), 'utf8');
+			console.log(`[generate-installer-${tempId}] User's mainActions are written to main-action.json`);
+		} catch (error) {
+			console.error(`[generate-installer-${tempId}] Failed to write main-action.json of id ${tempId}`, error);
+			throw 'Error Code: 9155832';
+		}
+
+		// Call optimizedBuildTouchlessWinforms with the new directory
+		console.log(`[generate-installer-${tempId}] Building...`);
+		await optimizedBuildTouchlessWinforms(tempWinformsDir);
+
+		// Read the Release directory content (bin/Release)
+		const releasePath = path.join(tempWinformsDir, 'TouchlessSetup', 'bin', 'Release');
+
+		// Create a temporary zip file
+		const zipPath = path.join(tmpdir(), `TouchlessSetup-Release-${tempId}.zip`);
+
+		try {
+			console.log(`[generate-installer-${tempId}] Creating zip file from Release directory...`);
+			await createOptimizedZipFromDirectory(releasePath, zipPath);
+			console.log(`[generate-installer-${tempId}] Zip file ready for streaming: ${zipPath}`);
+
+			return zipPath; // Return the path for streaming instead of buffer
+		} catch (readError) {
+			console.error(`[generate-installer-${tempId}] Failed to create zip file:`, readError);
+			throw 'Error Code: 9174885';
+		}
+
+	} finally {
+		// Cleanup: Delete the temporary directory
+		try {
+			await fs.rm(tempWinformsDir, { recursive: true, force: true });
+			console.log(`[generate-installer-${tempId}] Cleaned up temporary directory`);
+		} catch (cleanupError) {
+			console.error(`[generate-installer-${tempId}] Failed to cleanup temporary directory:`, cleanupError);
+			// Don't throw here as the main operation was successful
+		}
 	}
 }
