@@ -323,19 +323,69 @@ async function restoreAndBuildDotNetFramework(os: 'windows' | 'linux'): Promise<
 		console.log(`[build-repos-${config.name}] completed successfully (${result.duration}ms)`);
 	}
 
-	// Delete TouchlessSetup bin folder
-	try {
-		await fs.rm(path.join(TOUCHLESS_SETUP_REPO_LOCATION, 'TouchlessSetup', 'bin'), { recursive: true, force: true });
-		console.log('[build-repos] Removed TouchlessSetup `bin` folder; We only build it for each user demand, but here we just test it before running NextJS');
-	} catch (error) {
-		console.error('[build-repos] Failed to remove TouchlessSetup `bin` folder:', error);
+
+
+	// Clean up useless folders and files to speed up future builds
+	await cleanupUselessFilesAndFolders();
+}
+
+/**
+ * Clean up useless files and folders that slow down build copying process
+ * Focuses only on TouchlessSetup project since FileUtility is built once
+ */
+async function cleanupUselessFilesAndFolders(): Promise<void> {
+	console.log('[build-repos-TouchlessSetup-cleanup] Starting cleanup of useless files and folders...');
+	console.time('[build-repos-TouchlessSetup-cleanup] Cleanup took:')
+
+	const touchlessSetupProjPath = path.join(TOUCHLESS_SETUP_REPO_LOCATION, 'TouchlessSetup');
+
+	// Only clean up folders that are safe to delete from TouchlessSetup
+	const foldersToDelete = [
+		path.join(touchlessSetupProjPath, 'obj'),
+		path.join(touchlessSetupProjPath, 'bin'),
+
+		// NOTE: Do NOT delete 'packages' folder - it contains NuGet dependencies needed for building
+		// Without this folder, we would need to run 'nuget restore' again before each build
+
+		// Version control (not needed for building)
+		path.join(TOUCHLESS_SETUP_REPO_LOCATION, '.git'),
+		path.join(TOUCHLESS_SETUP_REPO_LOCATION, '.vs'),
+	];
+
+	// Only clean up files that are definitely not needed for building
+	const filesToDelete = [
+		// Documentation files (not needed for building)
+		path.join(touchlessSetupProjPath, 'README.md'),
+		path.join(touchlessSetupProjPath, '.todo'),
+
+		// Version control files (not needed for building)
+		path.join(touchlessSetupProjPath, '.gitignore'),
+		path.join(touchlessSetupProjPath, '.gitattributes'),
+	];
+
+	// Clean up folders
+	for (const folderPath of foldersToDelete) {
+		try {
+			await fs.rm(folderPath, { recursive: true, force: true });
+			console.log(`[build-repos-TouchlessSetup-cleanup] Removed folder: ${path.relative(TOUCHLESS_SETUP_REPO_LOCATION, folderPath)}`);
+		} catch (error) {
+			console.warn('[build-repos-TouchlessSetup-cleanup] Failed to remove folder:', { path: folderPath, error });
+			if (folderPath.includes('bin')) {
+				throw new Error(`[build-repos-TouchlessSetup-cleanup] Failed to remove folder: ${folderPath}\r\n${error}`);
+			}
+		}
 	}
 
-	// Delete TouchlessSetup `.vs` folder (useless in our case).
-	try {
-		await fs.rm(path.join(TOUCHLESS_SETUP_REPO_LOCATION, '.vs'), { recursive: true, force: true });
-		console.log('[build-repos] Removed TouchlessSetup `.vs` useless folder');
-	} catch (error) {
-		console.error('[build-repos] Failed to remove TouchlessSetup `.vs` folder:', error);
+	// Clean up files
+	for (const filePath of filesToDelete) {
+		try {
+			await fs.rm(filePath, { force: true });
+			console.log(`[build-repos-TouchlessSetup-cleanup] Removed file: ${path.relative(TOUCHLESS_SETUP_REPO_LOCATION, filePath)}`);
+		} catch (error) {
+			console.warn('[build-repos-TouchlessSetup-cleanup] Failed to remove file:', { path: filePath, error });
+		}
 	}
+
+	console.log('[build-repos-TouchlessSetup-cleanup] Cleanup completed successfully');
+	console.timeEnd('[build-repos-TouchlessSetup-cleanup] Cleanup took:')
 }

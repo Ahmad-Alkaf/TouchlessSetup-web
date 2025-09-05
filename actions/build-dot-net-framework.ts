@@ -2,7 +2,6 @@ import 'server-only';
 import path from "node:path";
 import { exec } from "node:child_process";
 import { promisify } from 'node:util';
-import { rm } from 'fs/promises'
 const execAsync = promisify(exec);
 
 export const WINFORMS_REPO_LOCATION = path.join(process.cwd(), 'private', 'winforms');
@@ -23,34 +22,46 @@ export async function optimizedBuildTouchlessWinforms(repoPath: string): Promise
 		console.error('MSBuild not found. Please ensure Visual Studio is installed or msbuild PATH is accessible.');
 		throw new Error('Error Code: 299008');
 	}
-
-	const command = `${msbuildPath} TouchlessSetup.sln /p:Configuration=Release /p:Platform="Any CPU" /m /p:BuildInParallel=true /p:PreferredToolArchitecture=x64 /nologo /verbosity:minimal`;
+	// MSBuild path on Windows
+	// "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+	/**
+/p:DeployOnBuild=true - Prepares files for deployment
+/p:AllowedReferenceRelatedFileExtensions=none - Prevents copying PDB files
+/p:GenerateSerializationAssemblies=Off - Disables XML serialization assembly generation
+/p:TreatWarningsAsErrors=false - Prevents warnings from failing the build
+/p:AutoGenerateBindingRedirects=true - Auto-generates binding redirects
+	 */
+	const command = `${msbuildPath} TouchlessSetup.sln /p:Configuration=Release /p:Platform="Any CPU" /m /p:BuildInParallel=true /p:PreferredToolArchitecture=x64 /nologo /verbosity:minimal /p:DeployOnBuild=true /p:AllowedReferenceRelatedFileExtensions=none /p:GenerateSerializationAssemblies=Off /p:TreatWarningsAsErrors=false /p:AutoGenerateBindingRedirects=true`;
 	const workingDir = path.join(repoPath, 'TouchlessSetup');
+	const releasePath = path.join(workingDir, 'bin', 'Release');
+
 	console.log(`[build-${repoName}] Command: ${command}`);
 	console.log(`[build-${repoName}] Working directory: ${workingDir}`);
-	console.time(`[build-${repoName}] Duration`);
+	console.time(`[build-${repoName}] SUCCEEDED and took`);
 
 	try {
+		// Build the project
 		const { stdout, stderr } = await execAsync(command, {
 			cwd: workingDir,
 			timeout: 30_000,
 			windowsHide: true
 		});
+
 		// Custom validation if provided, otherwise check for common success indicators
 		const isSuccess = stdout?.includes('bin\\Release\\TouchlessSetup.exe');
 
-		console.timeEnd(`[build-${repoName}] Duration`);
-		if (isSuccess) {
-			console.log(`[build-${repoName}] SUCCESS`);
-		} else {
+		if (!isSuccess) {
 			console.warn(`[build-${repoName}] Build completed but validation failed`);
 			console.warn(`[build-${repoName}] Output: ${(stderr + '\n' + stdout)}`);
+			throw new Error('Build validation failed');
 		}
+
+		console.timeEnd(`[build-${repoName}] SUCCEEDED and took`);
+
 	} catch (error) {
 		console.error(`[build-${repoName}] Build process failed:`, error);
 		throw 'Error Code: 8849289';
 	}
-
 }
 
 /**

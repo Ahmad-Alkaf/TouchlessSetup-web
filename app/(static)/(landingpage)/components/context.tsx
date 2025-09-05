@@ -209,7 +209,7 @@ export function Context({children}: {children: React.ReactNode}) {
 						}
 
 						// Successfully read all chunks
-						blob = new Blob(chunks as BlobPart[], { type: 'application/zip' });
+						blob = new Blob(chunks as BlobPart[], { type: 'application/octet-stream' });
 						setGenerationProgress(100);
 						
 					} catch (streamError) {
@@ -237,7 +237,7 @@ export function Context({children}: {children: React.ReactNode}) {
 				const filename = contentDisposition
 					?.split('filename=')[1]
 					?.replace(/["']/g, '') || 
-					`${generateFilename(selectedApps)}.zip`;
+					`${generateFilename(selectedApps)}.exe`;
 
 				const url = window.URL.createObjectURL(blob);
 				const link = document.createElement('a');
