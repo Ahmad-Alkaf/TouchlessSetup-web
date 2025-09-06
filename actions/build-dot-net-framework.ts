@@ -33,7 +33,6 @@ export async function optimizedBuildTouchlessWinforms(repoPath: string): Promise
 	 */
 	const command = `${msbuildPath} TouchlessSetup.sln /p:Configuration=Release /p:Platform="Any CPU" /m /p:BuildInParallel=true /p:PreferredToolArchitecture=x64 /nologo /verbosity:minimal /p:DeployOnBuild=true /p:AllowedReferenceRelatedFileExtensions=none /p:GenerateSerializationAssemblies=Off /p:TreatWarningsAsErrors=false /p:AutoGenerateBindingRedirects=true`;
 	const workingDir = path.join(repoPath, 'TouchlessSetup');
-	const releasePath = path.join(workingDir, 'bin', 'Release');
 
 	console.log(`[build-${repoName}] Command: ${command}`);
 	console.log(`[build-${repoName}] Working directory: ${workingDir}`);
@@ -53,7 +52,7 @@ export async function optimizedBuildTouchlessWinforms(repoPath: string): Promise
 		if (!isSuccess) {
 			console.warn(`[build-${repoName}] Build completed but validation failed`);
 			console.warn(`[build-${repoName}] Output: ${(stderr + '\n' + stdout)}`);
-			throw new Error('Build validation failed');
+			throw new Error(`[build-${repoName}] Build validation failed`);
 		}
 
 		console.timeEnd(`[build-${repoName}] SUCCEEDED and took`);

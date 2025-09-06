@@ -8,8 +8,6 @@ import { copyDirectory, generateTempId } from './components/copy-directory';
 import { optimizedBuildTouchlessWinforms, WINFORMS_REPO_LOCATION } from '@/actions/build-dot-net-framework';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createWriteStream } from 'node:fs';
-import { tmpdir } from 'node:os';
 
 
 export async function POST(request: NextRequest) {
@@ -62,7 +60,7 @@ export async function POST(request: NextRequest) {
 }
 
 
-export async function generateInstallerExeFile(selectedApps: { id: string; name: string }[], tempId: string): Promise<string> {
+async function generateInstallerExeFile(selectedApps: { id: string; name: string }[], tempId: string): Promise<string> {
 
 	const mainAction: TSAction = generateMainActionContent(selectedApps);
 	const originalWinformsDir = path.join(WINFORMS_REPO_LOCATION, 'TouchlessSetup-winforms');
